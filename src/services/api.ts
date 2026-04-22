@@ -2,15 +2,20 @@ import axios from 'axios'
 import {
   adminMetrics,
   adminUsers,
+  approvalDossiers,
+  backupRecords,
   bookings,
   caregivers,
   caregiverMetrics,
   clientMetrics,
   earningsSeries,
+  hourlyServiceUpdates,
   messageThreads,
   notifications,
+  paymentProofs,
   platformSeries,
   reviews,
+  socialPosts,
   verificationSteps,
 } from './mockData'
 
@@ -62,6 +67,26 @@ export const mockApi = {
   async getAdminUsers() {
     await wait()
     return adminUsers
+  },
+  async getApprovalDossiers() {
+    await wait()
+    return approvalDossiers
+  },
+  async getPaymentProofs() {
+    await wait()
+    return paymentProofs
+  },
+  async getSocialPosts() {
+    await wait()
+    return socialPosts
+  },
+  async getHourlyServiceUpdates() {
+    await wait()
+    return hourlyServiceUpdates
+  },
+  async getBackupRecords() {
+    await wait()
+    return backupRecords
   },
   async getVerificationSteps() {
     await wait()

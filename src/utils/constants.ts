@@ -2,8 +2,6 @@ import type { DemoUser, NavItem, PricingPlan, UserRole } from '../types'
 
 export const publicNav: NavItem[] = [
   { label: 'Como funciona', href: '/how-it-works' },
-  { label: 'Buscar cuidadores', href: '/search' },
-  { label: 'Demo', href: '/demo' },
   { label: 'Trust & Safety', href: '/trust-safety' },
   { label: 'Help', href: '/help' },
 ]
@@ -20,6 +18,7 @@ export const footerNav: NavItem[] = [
 export const dashboardNav: Record<UserRole, NavItem[]> = {
   client: [
     { label: 'Inicio', href: '/client/home' },
+    { label: 'Reservar servicio', href: '/client/booking' },
     { label: 'Reservas activas', href: '/client/bookings' },
     { label: 'Servicios proximos', href: '/client/upcoming' },
     { label: 'Favoritos', href: '/client/favorites' },
@@ -28,11 +27,11 @@ export const dashboardNav: Record<UserRole, NavItem[]> = {
     { label: 'Notificaciones', href: '/client/notifications' },
     { label: 'Pagos', href: '/client/payments' },
     { label: 'Resenas dadas', href: '/client/reviews' },
+    { label: 'Reportes', href: '/client/reports' },
     { label: 'Ajustes', href: '/client/settings' },
   ],
   caregiver: [
     { label: 'Inicio', href: '/caregiver/home' },
-    { label: 'Verificacion', href: '/caregiver/verification' },
     { label: 'Solicitudes', href: '/caregiver/jobs', badge: '5' },
     { label: 'Trabajos aceptados', href: '/caregiver/accepted-jobs' },
     { label: 'Calendario', href: '/caregiver/calendar' },
@@ -55,7 +54,7 @@ export const dashboardNav: Record<UserRole, NavItem[]> = {
     { label: 'Analitica', href: '/admin/analytics' },
     { label: 'Contenido', href: '/admin/content' },
     { label: 'Auditoria', href: '/admin/audit-logs' },
-    { label: 'Ajustes', href: '/admin/settings' },
+    { label: 'Backup y ajustes', href: '/admin/settings' },
   ],
 }
 

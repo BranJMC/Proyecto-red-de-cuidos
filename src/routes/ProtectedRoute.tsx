@@ -12,7 +12,7 @@ export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) 
   const role = useAppStore((state) => state.user.role)
 
   if (!allowedRoles.includes(role)) {
-    return <Navigate to="/auth/login" replace />
+    return <Navigate to="/" replace />
   }
 
   return <>{children}</>

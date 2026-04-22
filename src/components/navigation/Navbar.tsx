@@ -32,14 +32,8 @@ export function Navbar() {
           <Link to="/demo">
             <Button variant="secondary">Demo mode</Button>
           </Link>
-          <Link to="/auth/login">
-            <Button variant="ghost">Ingresar</Button>
-          </Link>
-          <Link to="/auth/register">
-            <Button>Crear cuenta</Button>
-          </Link>
         </div>
-        <MobileMenu items={[...publicNav, { label: 'Demo', href: '/demo' }, { label: 'Ingresar', href: '/auth/login' }]} />
+        <MobileMenu items={[...publicNav, { label: 'Demo', href: '/demo' }]} />
       </div>
     </header>
   )

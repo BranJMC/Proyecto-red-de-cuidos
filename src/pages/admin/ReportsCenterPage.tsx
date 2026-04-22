@@ -10,7 +10,9 @@ export function ReportsCenterPage() {
             <h2 className="font-display text-2xl text-slate-950 dark:text-white">{report.subject}</h2>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(report.status)}`}>{report.status}</span>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">{report.type} • prioridad {report.priority}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            {report.type} • categoria {report.category} • urgencia {report.urgency} • prioridad {report.priority}
+          </p>
         </article>
       ))}
     </div>

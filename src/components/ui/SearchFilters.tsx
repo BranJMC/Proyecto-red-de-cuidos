@@ -7,7 +7,7 @@ export function SearchFilters() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <select className="field">
           {zones.map((zone) => (
-            <option key={zone.id}>{zone.city} · {zone.neighborhood}</option>
+            <option key={zone.id}>{zone.province} • {zone.city} • {zone.neighborhood}</option>
           ))}
         </select>
         <select className="field">

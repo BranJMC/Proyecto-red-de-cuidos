@@ -19,6 +19,7 @@ export interface DemoUser {
 
 export interface Zone {
   id: string
+  province: string
   city: string
   neighborhood: string
   demandLevel: 'high' | 'medium' | 'emerging'
@@ -30,6 +31,7 @@ export interface Caregiver {
   slug: string
   name: string
   specialty: string
+  province: string
   city: string
   neighborhood: string
   zones: string[]
@@ -54,6 +56,8 @@ export interface Caregiver {
   availability: string[]
   workingDays: string[]
   workingHours: string[]
+  serviceCount: number
+  rank: 'Bronze' | 'Silver' | 'Gold' | 'Platinum'
   image: string
 }
 
@@ -100,6 +104,23 @@ export interface ChatMessage {
   attachment?: string
 }
 
+export interface ServiceUpdate {
+  id: string
+  hourLabel: string
+  author: string
+  summary: string
+  evidenceLabel: string
+  status: 'on-track' | 'attention' | 'completed'
+}
+
+export interface ShiftLog {
+  bookingId: string
+  caregiverName: string
+  checkIn: string
+  checkOut?: string
+  status: 'pending-start' | 'in-progress' | 'checked-out'
+}
+
 export interface DashboardMetric {
   label: string
   value: string
@@ -135,6 +156,7 @@ export interface PricingPlan {
 export interface Review {
   id: string
   author: string
+  caregiverName?: string
   rating: number
   date: string
   comment: string
@@ -163,12 +185,18 @@ export interface PaymentProof {
   uploadedAt: string
   status: 'Pending Review' | 'Approved' | 'Rejected'
   amount: number
+  aiDecision: 'approved' | 'manual-review' | 'rejected'
+  aiConfidence: number
+  anomaly: string
+  reviewedBy: string
 }
 
 export interface Complaint {
   id: string
   subject: string
   type: string
+  category: string
+  urgency: 'urgent' | 'notice' | 'other'
   priority: 'high' | 'medium' | 'low'
   status: 'open' | 'investigating' | 'resolved'
 }
@@ -203,6 +231,48 @@ export interface AuditLog {
   action: string
   target: string
   timestamp: string
+}
+
+export interface ApprovalDossier {
+  id: string
+  caregiverId: string
+  caregiverName: string
+  roleFit: string
+  aiDecision: 'recommended' | 'manual-review' | 'reject'
+  aiConfidence: number
+  aiSummary: string
+  flags: string[]
+  stepStatuses: VerificationStep[]
+  documents: string[]
+}
+
+export interface SocialPost {
+  id: string
+  author: string
+  authorRole: UserRole | 'platform'
+  avatar: string
+  time: string
+  content: string
+  image?: string
+  likes: number
+  comments: number
+  visibility: 'public' | 'community'
+}
+
+export interface BackupRecord {
+  id: string
+  generatedAt: string
+  scope: string
+  status: 'ready' | 'in-progress' | 'failed'
+  size: string
+}
+
+export interface CalendarDayStatus {
+  date: string
+  day: number
+  state: 'booked' | 'available' | 'off'
+  serviceType?: string
+  timeRange?: string
 }
 
 export interface BookingEstimate {

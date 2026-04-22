@@ -28,10 +28,24 @@ export function CaregiverSettingsPage() {
             <input className="field" defaultValue={profile.emergencyFee} />
           </div>
         </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Provincia principal</label>
+            <select className="field" defaultValue={profile.province}>
+              {[...new Set(zones.map((zone) => zone.province))].map((province) => (
+                <option key={province}>{province}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Zona de referencia</label>
+            <input className="field" defaultValue={`${profile.city} • ${profile.neighborhood}`} />
+          </div>
+        </div>
         <textarea className="field mt-4 min-h-32" defaultValue="Perfil profesional premium para atraer mejores reservas, turnos de emergencia y familias recurrentes." />
         <Button className="mt-6">Guardar configuracion</Button>
       </section>
-      <ZoneSelector zones={zones} />
+      <ZoneSelector zones={zones.filter((zone) => zone.province === profile.province)} />
       <AvailabilityScheduler />
     </div>
   )

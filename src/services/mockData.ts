@@ -1,7 +1,9 @@
 import type {
   AdminUser,
-  AuditLog,
+  ApprovalDossier,
+  BackupRecord,
   Booking,
+  CalendarDayStatus,
   Caregiver,
   Complaint,
   ContentItem,
@@ -13,17 +15,20 @@ import type {
   PaymentProof,
   Review,
   SavedSearch,
+  ServiceUpdate,
+  ShiftLog,
+  SocialPost,
   SupportTicket,
   VerificationStep,
   Zone,
 } from '../types'
 
 export const zones: Zone[] = [
-  { id: 'z1', city: 'San Jose', neighborhood: 'Escazu', demandLevel: 'high', activeCaregivers: 38 },
-  { id: 'z2', city: 'San Jose', neighborhood: 'Santa Ana', demandLevel: 'high', activeCaregivers: 29 },
-  { id: 'z3', city: 'Heredia', neighborhood: 'Belen', demandLevel: 'medium', activeCaregivers: 17 },
-  { id: 'z4', city: 'Alajuela', neighborhood: 'La Guacima', demandLevel: 'emerging', activeCaregivers: 12 },
-  { id: 'z5', city: 'Cartago', neighborhood: 'Tres Rios', demandLevel: 'medium', activeCaregivers: 14 },
+  { id: 'z1', province: 'San Jose', city: 'Escazu', neighborhood: 'San Rafael', demandLevel: 'high', activeCaregivers: 38 },
+  { id: 'z2', province: 'San Jose', city: 'Santa Ana', neighborhood: 'Pozos', demandLevel: 'high', activeCaregivers: 29 },
+  { id: 'z3', province: 'Heredia', city: 'Belen', neighborhood: 'La Ribera', demandLevel: 'medium', activeCaregivers: 17 },
+  { id: 'z4', province: 'Alajuela', city: 'La Guacima', neighborhood: 'Hacienda Los Reyes', demandLevel: 'emerging', activeCaregivers: 12 },
+  { id: 'z5', province: 'Cartago', city: 'La Union', neighborhood: 'Tres Rios', demandLevel: 'medium', activeCaregivers: 14 },
 ]
 
 export const caregivers: Caregiver[] = [
@@ -32,9 +37,10 @@ export const caregivers: Caregiver[] = [
     slug: 'valeria-rojas',
     name: 'Valeria Rojas',
     specialty: 'Child care and learning support',
-    city: 'San Jose',
-    neighborhood: 'Escazu',
-    zones: ['Escazu', 'Santa Ana', 'Sabana'],
+    province: 'San Jose',
+    city: 'Escazu',
+    neighborhood: 'San Rafael',
+    zones: ['San Jose', 'Escazu', 'Santa Ana'],
     languages: ['Espanol', 'Ingles'],
     pricePerHour: 18,
     nightShiftFee: 8,
@@ -57,6 +63,8 @@ export const caregivers: Caregiver[] = [
     availability: ['Hoy 14:00-20:00', 'Manana 08:00-18:00', 'Sabado 09:00-15:00'],
     workingDays: ['Lunes', 'Martes', 'Jueves', 'Viernes', 'Sabado'],
     workingHours: ['07:00-12:00', '14:00-21:00'],
+    serviceCount: 146,
+    rank: 'Platinum',
     image:
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=80',
   },
@@ -65,9 +73,10 @@ export const caregivers: Caregiver[] = [
     slug: 'daniel-castro',
     name: 'Daniel Castro',
     specialty: 'Elder care and medication routines',
-    city: 'Heredia',
-    neighborhood: 'Belen',
-    zones: ['Belen', 'Heredia Centro', 'Lagunilla'],
+    province: 'Heredia',
+    city: 'Belen',
+    neighborhood: 'La Ribera',
+    zones: ['Heredia', 'Belen', 'Heredia Centro'],
     languages: ['Espanol'],
     pricePerHour: 20,
     nightShiftFee: 10,
@@ -90,6 +99,8 @@ export const caregivers: Caregiver[] = [
     availability: ['Lunes a Viernes 07:00-17:00'],
     workingDays: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'],
     workingHours: ['07:00-17:00'],
+    serviceCount: 89,
+    rank: 'Gold',
     image:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80',
   },
@@ -98,9 +109,10 @@ export const caregivers: Caregiver[] = [
     slug: 'monica-arias',
     name: 'Monica Arias',
     specialty: 'Disability support and adaptive routines',
-    city: 'Alajuela',
-    neighborhood: 'La Guacima',
-    zones: ['La Guacima', 'Coyol', 'Belen'],
+    province: 'Alajuela',
+    city: 'La Guacima',
+    neighborhood: 'Hacienda Los Reyes',
+    zones: ['Alajuela', 'La Guacima', 'Coyol'],
     languages: ['Espanol', 'Ingles', 'LESCO'],
     pricePerHour: 24,
     nightShiftFee: 12,
@@ -123,6 +135,8 @@ export const caregivers: Caregiver[] = [
     availability: ['Disponible 24 horas con reserva'],
     workingDays: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
     workingHours: ['06:00-22:00'],
+    serviceCount: 58,
+    rank: 'Gold',
     image:
       'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=900&q=80',
   },
@@ -131,9 +145,10 @@ export const caregivers: Caregiver[] = [
     slug: 'sofia-meneses',
     name: 'Sofia Meneses',
     specialty: 'Home assistance and overnight care',
-    city: 'Cartago',
+    province: 'Cartago',
+    city: 'La Union',
     neighborhood: 'Tres Rios',
-    zones: ['Tres Rios', 'Curridabat', 'San Pedro'],
+    zones: ['Cartago', 'Tres Rios', 'Curridabat'],
     languages: ['Espanol', 'Ingles'],
     pricePerHour: 19,
     nightShiftFee: 9,
@@ -156,6 +171,8 @@ export const caregivers: Caregiver[] = [
     availability: ['Hoy 18:00-23:00', 'Domingo 08:00-20:00'],
     workingDays: ['Martes', 'Jueves', 'Viernes', 'Sabado', 'Domingo'],
     workingHours: ['08:00-23:00'],
+    serviceCount: 21,
+    rank: 'Silver',
     image:
       'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80',
   },
@@ -169,7 +186,7 @@ export const bookings: Booking[] = [
     clientName: 'Ana Gutierrez',
     service: 'Child care',
     zone: 'Escazu',
-    date: '2026-04-19',
+    date: '2026-04-22',
     startTime: '14:00',
     duration: '4 horas',
     hours: 4,
@@ -183,7 +200,7 @@ export const bookings: Booking[] = [
     clientName: 'Familia Robles',
     service: 'Elder care',
     zone: 'Belen',
-    date: '2026-04-21',
+    date: '2026-04-25',
     startTime: '08:00',
     duration: '8 horas',
     hours: 8,
@@ -211,7 +228,7 @@ export const bookings: Booking[] = [
     clientName: 'Ana Gutierrez',
     service: 'Overnight care',
     zone: 'Tres Rios',
-    date: '2026-04-23',
+    date: '2026-04-27',
     startTime: '20:00',
     duration: '10 horas',
     hours: 10,
@@ -219,6 +236,8 @@ export const bookings: Booking[] = [
     amount: 235,
   },
 ]
+
+export const clientBookings = bookings.filter((booking) => booking.clientName === 'Ana Gutierrez')
 
 export const notifications: NotificationItem[] = [
   {
@@ -282,6 +301,40 @@ export const messageThreads: MessageThread[] = [
   },
 ]
 
+export const activeShift: ShiftLog = {
+  bookingId: 'bk-1',
+  caregiverName: 'Valeria Rojas',
+  checkIn: '14:02',
+  status: 'in-progress',
+}
+
+export const hourlyServiceUpdates: ServiceUpdate[] = [
+  {
+    id: 'su-1',
+    hourLabel: '15:00',
+    author: 'Valeria Rojas',
+    summary: 'Todo estable. Merienda completada y rutina tranquila.',
+    evidenceLabel: 'Foto del cuaderno de actividades',
+    status: 'on-track',
+  },
+  {
+    id: 'su-2',
+    hourLabel: '16:00',
+    author: 'Valeria Rojas',
+    summary: 'Se realizo actividad guiada. Cliente notificado en tiempo real.',
+    evidenceLabel: 'Imagen del material usado',
+    status: 'on-track',
+  },
+  {
+    id: 'su-3',
+    hourLabel: '17:00',
+    author: 'Valeria Rojas',
+    summary: 'Hora obligatoria pendiente de evidencia final antes de check-out.',
+    evidenceLabel: 'Esperando carga de evidencia',
+    status: 'attention',
+  },
+]
+
 export const clientMetrics: DashboardMetric[] = [
   { label: 'Monthly spending', value: '$824', change: '+14% vs mes pasado', accent: 'sky' },
   { label: 'Active bookings', value: '03', change: '2 empiezan esta semana', accent: 'emerald' },
@@ -291,9 +344,9 @@ export const clientMetrics: DashboardMetric[] = [
 
 export const caregiverMetrics: DashboardMetric[] = [
   { label: 'Weekly earnings', value: '$640', change: '+11% vs sem anterior', accent: 'emerald' },
-  { label: 'Jobs completed', value: '18', change: '4 esta semana', accent: 'sky' },
-  { label: 'Rating score', value: '4.9', change: '128 resenas', accent: 'amber' },
-  { label: 'Response speed', value: '7 min', change: 'Top 8% de la red', accent: 'rose' },
+  { label: 'Jobs completed', value: '58', change: '+4 esta semana', accent: 'sky' },
+  { label: 'Rating score', value: '5.0', change: '67 resenas', accent: 'amber' },
+  { label: 'Service rank', value: 'Gold', change: '58 servicios completados', accent: 'rose' },
 ]
 
 export const adminMetrics: DashboardMetric[] = [
@@ -358,12 +411,25 @@ export const verificationSteps: VerificationStep[] = [
     description: 'Valida el numero movil con OTP de 6 digitos.',
     status: 'pending',
   },
+  {
+    id: 'vs-5',
+    title: 'Curriculum adjunto',
+    description: 'Documento profesional para revision operativa.',
+    status: 'pending',
+  },
+  {
+    id: 'vs-6',
+    title: 'Hoja de vida',
+    description: 'Historial complementario del cuidador.',
+    status: 'pending',
+  },
 ]
 
 export const reviews: Review[] = [
   {
     id: 'rv-1',
     author: 'Laura Vega',
+    caregiverName: 'Valeria Rojas',
     rating: 5,
     date: '14 Apr 2026',
     comment: 'Valeria fue increible con mis hijos. Puntual, calida y super profesional.',
@@ -371,6 +437,7 @@ export const reviews: Review[] = [
   {
     id: 'rv-2',
     author: 'Pablo Rojas',
+    caregiverName: 'Monica Arias',
     rating: 5,
     date: '08 Apr 2026',
     comment: 'Monica entendio rapidamente nuestras necesidades y mejoro la rutina en casa.',
@@ -378,6 +445,7 @@ export const reviews: Review[] = [
   {
     id: 'rv-3',
     author: 'Marcela Soto',
+    caregiverName: 'Sofia Meneses',
     rating: 4,
     date: '05 Apr 2026',
     comment: 'Sofia resolvio una noche compleja con mucho criterio y comunicacion.',
@@ -388,13 +456,13 @@ export const savedSearches: SavedSearch[] = [
   {
     id: 'ss-1',
     title: 'Cuidado nocturno en Escazu',
-    filters: ['Escazu', 'Overnight care', 'Verified only'],
+    filters: ['San Jose', 'Escazu', 'Overnight care', 'Verified only'],
     matches: 12,
   },
   {
     id: 'ss-2',
     title: 'Apoyo bilingue de emergencia',
-    filters: ['Emergency care', 'Ingles', 'Available now'],
+    filters: ['Alajuela', 'Emergency care', 'Ingles', 'Available now'],
     matches: 7,
   },
 ]
@@ -406,15 +474,48 @@ export const paymentHistory: PaymentHistoryItem[] = [
 ]
 
 export const paymentProofs: PaymentProof[] = [
-  { id: 'pp-1', bookingId: 'bk-1', payer: 'Ana Gutierrez', uploadedAt: '19 Apr 2026 12:10', status: 'Pending Review', amount: 72 },
-  { id: 'pp-2', bookingId: 'bk-3', payer: 'Pablo Rojas', uploadedAt: '16 Apr 2026 09:02', status: 'Approved', amount: 144 },
-  { id: 'pp-3', bookingId: 'bk-2', payer: 'Familia Robles', uploadedAt: '18 Apr 2026 18:40', status: 'Rejected', amount: 160 },
+  {
+    id: 'pp-1',
+    bookingId: 'bk-1',
+    payer: 'Ana Gutierrez',
+    uploadedAt: '19 Apr 2026 12:10',
+    status: 'Pending Review',
+    amount: 72,
+    aiDecision: 'manual-review',
+    aiConfidence: 0.82,
+    anomaly: 'OCR detecto posible recorte en sello bancario',
+    reviewedBy: 'Pendiente admin',
+  },
+  {
+    id: 'pp-2',
+    bookingId: 'bk-3',
+    payer: 'Pablo Rojas',
+    uploadedAt: '16 Apr 2026 09:02',
+    status: 'Approved',
+    amount: 144,
+    aiDecision: 'approved',
+    aiConfidence: 0.97,
+    anomaly: 'Sin anomalias',
+    reviewedBy: 'Sara de soporte',
+  },
+  {
+    id: 'pp-3',
+    bookingId: 'bk-2',
+    payer: 'Familia Robles',
+    uploadedAt: '18 Apr 2026 18:40',
+    status: 'Rejected',
+    amount: 160,
+    aiDecision: 'rejected',
+    aiConfidence: 0.91,
+    anomaly: 'Monto no coincide con booking y posible edicion digital',
+    reviewedBy: 'Carlos Mora',
+  },
 ]
 
 export const complaints: Complaint[] = [
-  { id: 'cp-1', subject: 'Llegada tardia', type: 'servicio', priority: 'medium', status: 'investigating' },
-  { id: 'cp-2', subject: 'Documento no legible', type: 'verificacion', priority: 'high', status: 'open' },
-  { id: 'cp-3', subject: 'Cobro duplicado', type: 'pagos', priority: 'high', status: 'resolved' },
+  { id: 'cp-1', subject: 'Llegada tardia', type: 'servicio', category: 'cuidador', urgency: 'notice', priority: 'medium', status: 'investigating' },
+  { id: 'cp-2', subject: 'Documento no legible', type: 'verificacion', category: 'plataforma', urgency: 'other', priority: 'high', status: 'open' },
+  { id: 'cp-3', subject: 'Cobro duplicado', type: 'pagos', category: 'pago', urgency: 'urgent', priority: 'high', status: 'resolved' },
 ]
 
 export const supportTickets: SupportTicket[] = [
@@ -453,11 +554,126 @@ export const contentItems: ContentItem[] = [
   { id: 'ct-3', title: 'Blog crisis care at night', section: 'Blog', status: 'draft' },
 ]
 
-export const auditLogs: AuditLog[] = [
+export const socialPosts: SocialPost[] = [
+  {
+    id: 'sp-1',
+    author: 'Valeria Rojas',
+    authorRole: 'caregiver',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    time: 'Hace 40 min',
+    content: 'Compartiendo ideas de rutina tranquila para las primeras horas del servicio. La comunicacion con la familia hace toda la diferencia.',
+    image: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=900&q=80',
+    likes: 84,
+    comments: 12,
+    visibility: 'public',
+  },
+  {
+    id: 'sp-2',
+    author: 'Red de Cuidados',
+    authorRole: 'platform',
+    avatar: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80',
+    time: 'Hace 2 h',
+    content: 'Nuevo recordatorio operativo: cada hora del servicio requiere un status con evidencia para dar mas tranquilidad al cliente.',
+    likes: 121,
+    comments: 23,
+    visibility: 'public',
+  },
+  {
+    id: 'sp-3',
+    author: 'Ana Gutierrez',
+    authorRole: 'client',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    time: 'Ayer',
+    content: 'Las resenas publicas y las evidencias por hora me dieron mucha mas seguridad al reservar.',
+    likes: 57,
+    comments: 8,
+    visibility: 'community',
+  },
+]
+
+export const backupRecords: BackupRecord[] = [
+  { id: 'br-1', generatedAt: '2026-04-22 00:05', scope: 'Actividad diaria completa', status: 'ready', size: '148 MB' },
+  { id: 'br-2', generatedAt: '2026-04-21 00:07', scope: 'Mensajes, bookings y comprobantes', status: 'ready', size: '132 MB' },
+  { id: 'br-3', generatedAt: '2026-04-20 00:04', scope: 'Actividad diaria completa', status: 'ready', size: '141 MB' },
+]
+
+export const auditLogs = [
   { id: 'al-1', actor: 'Carlos Mora', action: 'Aprobo cuidador', target: 'Monica Arias', timestamp: '2026-04-19 10:18' },
   { id: 'al-2', actor: 'Ops Bot', action: 'Marco alerta', target: 'Comprobante pp-1', timestamp: '2026-04-19 11:02' },
   { id: 'al-3', actor: 'Sara de soporte', action: 'Cerre ticket', target: 'st-2', timestamp: '2026-04-19 12:31' },
 ]
+
+export const approvalDossiers: ApprovalDossier[] = [
+  {
+    id: 'ad-1',
+    caregiverId: 'cg-3',
+    caregiverName: 'Monica Arias',
+    roleFit: 'Alta compatibilidad para servicios especializados y emergencias.',
+    aiDecision: 'recommended',
+    aiConfidence: 0.94,
+    aiSummary: 'Perfil consistente, documentos completos y reputacion fuerte para aprobacion.',
+    flags: ['Sin hallazgos criticos', 'Certificaciones vigentes'],
+    stepStatuses: [
+      { id: '1', title: 'Cedula nacional', description: 'OCR y validacion visual completadas.', status: 'approved' },
+      { id: '2', title: 'Foto facial', description: 'Match biometrico correcto.', status: 'approved' },
+      { id: '3', title: 'Email verificado', description: 'OTP correcto.', status: 'approved' },
+      { id: '4', title: 'SMS verificado', description: 'OTP correcto.', status: 'approved' },
+      { id: '5', title: 'Curriculum', description: 'Analizado y legible.', status: 'approved' },
+      { id: '6', title: 'Hoja de vida', description: 'Coincide con experiencia declarada.', status: 'approved' },
+    ],
+    documents: ['Cedula frente y reverso', 'Curriculum.pdf', 'HojaVida.pdf', 'Certificacion terapia ocupacional', 'Constancia de RCP'],
+  },
+  {
+    id: 'ad-2',
+    caregiverId: 'cg-4',
+    caregiverName: 'Sofia Meneses',
+    roleFit: 'Buen perfil, pero requiere segunda revision de documento adicional.',
+    aiDecision: 'manual-review',
+    aiConfidence: 0.76,
+    aiSummary: 'El perfil es prometedor, pero la AI detecta ligera inconsistencia en un soporte cargado.',
+    flags: ['Documento secundario borroso', 'Revisar experiencia nocturna'],
+    stepStatuses: [
+      { id: '1', title: 'Cedula nacional', description: 'OCR parcial por sombra lateral.', status: 'pending' },
+      { id: '2', title: 'Foto facial', description: 'Captura valida.', status: 'approved' },
+      { id: '3', title: 'Email verificado', description: 'OTP correcto.', status: 'approved' },
+      { id: '4', title: 'SMS verificado', description: 'OTP correcto.', status: 'approved' },
+      { id: '5', title: 'Curriculum', description: 'Legible.', status: 'approved' },
+      { id: '6', title: 'Hoja de vida', description: 'Falta soporte extra.', status: 'pending' },
+    ],
+    documents: ['Cedula frente y reverso', 'Curriculum.pdf', 'HojaVida.pdf', 'Constancia paliativos', 'Carta de referencia'],
+  },
+]
+
+export const caregiverUpcomingReminders = [
+  { id: 'rem-1', date: '24 Apr', time: '08:00', service: 'Disability support', client: 'Familia Mora' },
+  { id: 'rem-2', date: '27 Apr', time: '20:00', service: 'Overnight care', client: 'Ana Gutierrez' },
+  { id: 'rem-3', date: '29 Apr', time: '09:00', service: 'Home assistance', client: 'Residencia Rivera' },
+]
+
+export const calendarDaysByCaregiver: Record<string, CalendarDayStatus[]> = {
+  'cg-1': [
+    { date: '2026-04-22', day: 22, state: 'booked', serviceType: 'Child care', timeRange: '14:00 - 18:00' },
+    { date: '2026-04-23', day: 23, state: 'available' },
+    { date: '2026-04-24', day: 24, state: 'available' },
+    { date: '2026-04-25', day: 25, state: 'off' },
+    { date: '2026-04-26', day: 26, state: 'off' },
+    { date: '2026-04-27', day: 27, state: 'booked', serviceType: 'Overnight care', timeRange: '20:00 - 06:00' },
+    { date: '2026-04-28', day: 28, state: 'available' },
+    { date: '2026-04-29', day: 29, state: 'available' },
+    { date: '2026-04-30', day: 30, state: 'available' },
+  ],
+  'cg-3': [
+    { date: '2026-04-22', day: 22, state: 'available' },
+    { date: '2026-04-23', day: 23, state: 'booked', serviceType: 'Disability support', timeRange: '09:00 - 15:00' },
+    { date: '2026-04-24', day: 24, state: 'booked', serviceType: 'Emergency care', timeRange: '18:00 - 22:00' },
+    { date: '2026-04-25', day: 25, state: 'available' },
+    { date: '2026-04-26', day: 26, state: 'off' },
+    { date: '2026-04-27', day: 27, state: 'booked', serviceType: 'Home assistance', timeRange: '10:00 - 14:00' },
+    { date: '2026-04-28', day: 28, state: 'available' },
+    { date: '2026-04-29', day: 29, state: 'available' },
+    { date: '2026-04-30', day: 30, state: 'available' },
+  ],
+}
 
 export const earningsSeries = [
   { name: 'Sem 1', ingresos: 380 },

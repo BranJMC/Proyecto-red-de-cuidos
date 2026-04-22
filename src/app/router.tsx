@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
@@ -18,9 +18,9 @@ import { BlogPage } from '../pages/public/BlogPage'
 import { TestimonialsPage } from '../pages/public/TestimonialsPage'
 import { TrustSafetyPage } from '../pages/public/TrustSafetyPage'
 import { DemoPage } from '../pages/public/DemoPage'
+import { CommunityPage } from '../pages/public/CommunityPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
-import { LoginPage } from '../pages/auth/LoginPage'
-import { RegisterPage } from '../pages/auth/RegisterPage'
+import { RoleAccessPage } from '../pages/auth/RoleAccessPage'
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage'
 import { EmailVerificationPage } from '../pages/auth/EmailVerificationPage'
 import { SmsVerificationPage } from '../pages/auth/SmsVerificationPage'
@@ -36,8 +36,8 @@ import { ClientSettingsPage } from '../pages/client/ClientSettingsPage'
 import { UpcomingServicesPage } from '../pages/client/UpcomingServicesPage'
 import { SavedSearchesPage } from '../pages/client/SavedSearchesPage'
 import { ClientReviewsPage } from '../pages/client/ClientReviewsPage'
+import { ClientReportsPage } from '../pages/client/ClientReportsPage'
 import { CaregiverHomePage } from '../pages/caregiver/CaregiverHomePage'
-import { VerificationWizardPage } from '../pages/caregiver/VerificationWizardPage'
 import { JobRequestsPage } from '../pages/caregiver/JobRequestsPage'
 import { CalendarPage } from '../pages/caregiver/CalendarPage'
 import { CaregiverMessagesPage } from '../pages/caregiver/CaregiverMessagesPage'
@@ -75,6 +75,7 @@ export const router = createBrowserRouter([
       { path: '/faq', element: <FaqPage /> },
       { path: '/demo', element: <DemoPage /> },
       { path: '/search', element: <SearchCaregiversPage /> },
+      { path: '/community', element: <CommunityPage /> },
       { path: '/booking', element: <BookingPage /> },
       { path: '/help', element: <HelpCenterPage /> },
       { path: '/support', element: <SupportPage /> },
@@ -92,8 +93,9 @@ export const router = createBrowserRouter([
     path: '/auth',
     element: <AuthLayout />,
     children: [
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
+      { path: 'access/:role', element: <RoleAccessPage /> },
+      { path: 'login', element: <Navigate to="/" replace /> },
+      { path: 'register', element: <Navigate to="/" replace /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'verify-email', element: <EmailVerificationPage /> },
@@ -109,6 +111,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: 'home', element: <ClientHomePage /> },
+      { path: 'booking', element: <BookingPage /> },
       { path: 'search', element: <SearchCaregiversPage /> },
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'upcoming', element: <UpcomingServicesPage /> },
@@ -118,6 +121,7 @@ export const router = createBrowserRouter([
       { path: 'bookings', element: <ClientBookingsPage /> },
       { path: 'payments', element: <ClientPaymentsPage /> },
       { path: 'reviews', element: <ClientReviewsPage /> },
+      { path: 'reports', element: <ClientReportsPage /> },
       { path: 'settings', element: <ClientSettingsPage /> },
     ],
   },
@@ -130,7 +134,6 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: 'home', element: <CaregiverHomePage /> },
-      { path: 'verification', element: <VerificationWizardPage /> },
       { path: 'jobs', element: <JobRequestsPage /> },
       { path: 'accepted-jobs', element: <AcceptedJobsPage /> },
       { path: 'calendar', element: <CalendarPage /> },

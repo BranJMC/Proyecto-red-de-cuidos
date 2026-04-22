@@ -1,5 +1,12 @@
-import { CalendarCard } from '../../components/ui/CalendarCard'
+import { caregivers, calendarDaysByCaregiver } from '../../services/mockData'
+import { MonthAvailabilityCalendar } from '../../components/ui/MonthAvailabilityCalendar'
 
 export function CalendarPage() {
-  return <CalendarCard days={['Lunes 07:00-17:00', 'Martes 07:00-17:00', 'Jueves 12:00-20:00', 'Sabado 09:00-14:00']} />
+  const profile = caregivers[2]
+  return (
+    <MonthAvailabilityCalendar
+      title={`Calendario mensual de ${profile.name}`}
+      days={calendarDaysByCaregiver[profile.id]}
+    />
+  )
 }

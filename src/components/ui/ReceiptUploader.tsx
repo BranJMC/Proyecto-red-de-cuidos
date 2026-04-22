@@ -9,17 +9,17 @@ export function ReceiptUploader() {
     <section className="rounded-[32px] border border-slate-200 bg-white/90 p-6 shadow-lg shadow-slate-200/30 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-none">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="font-display text-2xl text-slate-950 dark:text-white">Payment receipt uploader</h3>
+          <h3 className="font-display text-2xl text-slate-950 dark:text-white">Subida de comprobante</h3>
           <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-            This receipt will later be analyzed automatically by AI verification.
+            This receipt will later be analyzed automatically by AI verification and then reviewed by staff and admin when needed.
           </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(status)}`}>{status}</span>
       </div>
       <label className="mt-6 flex min-h-60 cursor-pointer flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.16),_transparent_55%)] p-6 text-center dark:border-white/10">
         <UploadCloud className="size-8 text-cyan-500" />
-        <p className="mt-4 font-medium text-slate-950 dark:text-white">Drag & drop or upload receipt</p>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Mobile camera upload y preview listo para integrar.</p>
+        <p className="mt-4 font-medium text-slate-950 dark:text-white">Arrastra o sube el comprobante</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Carga desde movil, camara y preview listos para integrar.</p>
         <div className="mt-6 flex gap-3">
           <span className="rounded-full bg-slate-950 px-4 py-2 text-sm text-white dark:bg-cyan-400 dark:text-slate-950">Seleccionar imagen</span>
           <span className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 dark:border-white/10 dark:text-slate-300">

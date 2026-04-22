@@ -16,7 +16,7 @@ const cedulaSchema = z.object({
     .regex(/^[0-9-]+$/, 'Solo numeros y guiones'),
 })
 
-export function CaregiverOnboardingWizard() {
+export function CaregiverOnboardingWizard({ preAccess = false }: { preAccess?: boolean }) {
   const [step, setStep] = useState(0)
   const form = useForm<z.infer<typeof cedulaSchema>>({
     resolver: zodResolver(cedulaSchema),
@@ -25,12 +25,9 @@ export function CaregiverOnboardingWizard() {
 
   const steps = [
     {
-      title: 'Verificacion de cedula',
+      title: 'Verificacion de cedula y documentos',
       content: (
-        <form
-          onSubmit={form.handleSubmit(() => setStep(1))}
-          className="space-y-5"
-        >
+        <form onSubmit={form.handleSubmit(() => setStep(1))} className="space-y-5">
           <div>
             <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Numero de cedula</label>
             <input {...form.register('idNumber')} className="field" placeholder="1-1234-5678" />
@@ -39,6 +36,8 @@ export function CaregiverOnboardingWizard() {
           <div className="grid gap-4 md:grid-cols-2">
             <FileUploader label="Frente de cedula" helper="Formato JPG/PNG, recorte automatico y OCR listo." />
             <FileUploader label="Reverso de cedula" helper="Validacion antifraude y lectura de datos posterior." />
+            <FileUploader label="Curriculum" helper="Adjunta tu CV profesional en PDF o imagen." />
+            <FileUploader label="Hoja de vida" helper="Sube tu historial o expediente profesional complementario." />
           </div>
           <Button type="submit">Continuar</Button>
         </form>
@@ -74,13 +73,13 @@ export function CaregiverOnboardingWizard() {
             </div>
           </div>
           <div className="lg:col-span-2 flex justify-end">
-            <Button onClick={() => setStep(3)}>Finalizar onboarding</Button>
+            <Button onClick={() => setStep(3)}>{preAccess ? 'Enviar a revision' : 'Finalizar onboarding'}</Button>
           </div>
         </div>
       ),
     },
     {
-      title: 'Estado del expediente',
+      title: preAccess ? 'Acceso bloqueado hasta aprobacion' : 'Estado del expediente',
       content: (
         <div className="grid gap-4">
           {verificationSteps.map((item) => (
@@ -97,6 +96,14 @@ export function CaregiverOnboardingWizard() {
               </span>
             </div>
           ))}
+          {preAccess ? (
+            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-400/20 dark:bg-amber-400/10">
+              <p className="font-medium text-slate-950 dark:text-white">No puedes acceder a la app todavía</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                El admin debe revisar y aprobar tu expediente antes de habilitarte para trabajar.
+              </p>
+            </div>
+          ) : null}
         </div>
       ),
     },

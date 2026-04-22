@@ -40,7 +40,7 @@ export function SearchCaregiversPage() {
               </div>
               <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">{caregiver.about}</p>
               <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                <span>{caregiver.neighborhood}, {caregiver.city}</span>
+                <span>{caregiver.province} • {caregiver.city} • {caregiver.neighborhood}</span>
                 <span>{currency(caregiver.pricePerHour)}/hora</span>
                 <span>{caregiver.experienceYears} anos experiencia</span>
                 <span>{caregiver.languages.join(', ')}</span>
@@ -58,7 +58,7 @@ export function SearchCaregiversPage() {
                     <Clock3 className="size-4" />
                     <span className="text-xs uppercase tracking-[0.18em]">Horario</span>
                   </div>
-                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">{caregiver.workingHours.join(' · ')}</p>
+                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">{caregiver.workingHours.join(' • ')}</p>
                 </div>
                 <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800/60">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">

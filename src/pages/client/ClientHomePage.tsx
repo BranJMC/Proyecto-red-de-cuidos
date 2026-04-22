@@ -26,7 +26,10 @@ export function ClientHomePage() {
             Valeria llegara a las 14:00. Ya confirmo llegada, ruta y checklist de cuidado.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/booking">
+            <Link to="/client/booking">
+              <Button>Reservar servicio</Button>
+            </Link>
+            <Link to="/client/booking">
               <Button>Repeat last booking</Button>
             </Link>
             <Link to="/search">

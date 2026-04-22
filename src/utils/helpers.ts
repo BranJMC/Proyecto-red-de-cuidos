@@ -31,6 +31,8 @@ export function statusTone(status: string) {
   if (
     status.includes('Approved') ||
     status.includes('approved') ||
+    status.includes('recommended') ||
+    status.includes('ready') ||
     status.includes('paid') ||
     status.includes('active') ||
     status.includes('completed') ||

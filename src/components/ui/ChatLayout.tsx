@@ -1,9 +1,17 @@
-import { ImagePlus } from 'lucide-react'
-import type { MessageThread } from '../../types'
+import { Camera, Clock3, ImagePlus } from 'lucide-react'
+import type { MessageThread, ServiceUpdate, ShiftLog } from '../../types'
 import { initials } from '../../utils/helpers'
 import { Button } from './Button'
 
-export function ChatLayout({ threads }: { threads: MessageThread[] }) {
+export function ChatLayout({
+  threads,
+  shiftLog,
+  hourlyUpdates,
+}: {
+  threads: MessageThread[]
+  shiftLog?: ShiftLog
+  hourlyUpdates?: ServiceUpdate[]
+}) {
   const activeThread = threads[0]
 
   return (
@@ -11,7 +19,7 @@ export function ChatLayout({ threads }: { threads: MessageThread[] }) {
       <aside className="rounded-[32px] border border-slate-200 bg-white/85 p-4 dark:border-white/10 dark:bg-slate-900/70">
         <div className="mb-4 px-2">
           <h3 className="font-display text-xl text-slate-950 dark:text-white">Conversaciones</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Chat y notificaciones en vivo listos para Socket.io.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Chat, evidencias y seguimiento operativo del servicio.</p>
         </div>
         <div className="space-y-2">
           {threads.map((thread) => (
@@ -61,16 +69,68 @@ export function ChatLayout({ threads }: { threads: MessageThread[] }) {
             </div>
           ))}
         </div>
-        <div className="flex flex-col gap-3 rounded-[28px] border border-slate-200 p-4 dark:border-white/10 sm:flex-row">
-          <input
-            className="min-h-12 flex-1 rounded-2xl bg-slate-50 px-4 text-sm text-slate-700 outline-none dark:bg-slate-800 dark:text-slate-200"
-            placeholder="Escribe un mensaje..."
-          />
-          <Button variant="secondary">
-            <ImagePlus className="mr-2 size-4" />
-            Imagen
-          </Button>
-          <Button>Enviar</Button>
+        {shiftLog ? (
+          <div className="mb-5 rounded-[28px] border border-slate-200 bg-slate-50/90 p-5 dark:border-white/10 dark:bg-slate-800/45">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-cyan-600 dark:text-cyan-300">Control horario</p>
+                <h4 className="mt-2 font-display text-2xl text-slate-950 dark:text-white">
+                  Entrada {shiftLog.checkIn} {shiftLog.checkOut ? `• Salida ${shiftLog.checkOut}` : '• Servicio en curso'}
+                </h4>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="secondary">
+                  <Clock3 className="mr-2 size-4" />
+                  Marcar entrada
+                </Button>
+                <Button>Marcar salida</Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {hourlyUpdates?.length ? (
+          <div className="mb-5 rounded-[28px] border border-slate-200 p-5 dark:border-white/10">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-600 dark:text-cyan-300">Status por hora obligatorio</p>
+              <h4 className="mt-2 font-display text-2xl text-slate-950 dark:text-white">Seguimiento con evidencia</h4>
+            </div>
+            <div className="space-y-3">
+              {hourlyUpdates.map((update) => (
+                <div key={update.id} className="rounded-2xl bg-slate-50 px-4 py-4 dark:bg-slate-800/60">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-medium text-slate-950 dark:text-white">{update.hourLabel}</p>
+                    <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white dark:bg-cyan-400 dark:text-slate-950">
+                      {update.status}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{update.summary}</p>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Evidencia: {update.evidenceLabel}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <div className="rounded-[28px] border border-slate-200 p-4 dark:border-white/10">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Debajo del chat, la cuidadora debe enviar cada hora un status con evidencia al cliente.
+            </p>
+            <Button variant="secondary">
+              <Camera className="mr-2 size-4" />
+              Evidencia
+            </Button>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              className="min-h-12 flex-1 rounded-2xl bg-slate-50 px-4 text-sm text-slate-700 outline-none dark:bg-slate-800 dark:text-slate-200"
+              placeholder="Escribe un mensaje o status del servicio..."
+            />
+            <Button variant="secondary">
+              <ImagePlus className="mr-2 size-4" />
+              Imagen
+            </Button>
+            <Button>Enviar</Button>
+          </div>
         </div>
       </section>
     </div>

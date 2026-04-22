@@ -1,115 +1,101 @@
 import { motion } from 'framer-motion'
 import {
   BadgeCheck,
-  CreditCard,
+  BriefcaseMedical,
+  HeartHandshake,
+  KeyRound,
   MessageSquareMore,
   ShieldCheck,
   Sparkles,
-  UsersRound,
+  UserRoundCheck,
 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { caregivers } from '../../services/mockData'
-import { pricingPlans } from '../../utils/constants'
-import { useInstallPrompt } from '../../hooks/useInstallPrompt'
-import { BookingModal } from '../../features/booking/BookingModal'
 import { Button } from '../../components/ui/Button'
 import { InfoCard } from '../../components/ui/InfoCard'
-import { RatingStars } from '../../components/ui/RatingStars'
 import { SectionHeading } from '../../components/ui/SectionHeading'
+import { useInstallPrompt } from '../../hooks/useInstallPrompt'
+import type { UserRole } from '../../types'
+
+type EntryRole = Extract<UserRole, 'client' | 'caregiver'>
+
+const roleCards: {
+  role: EntryRole
+  title: string
+  subtitle: string
+  description: string
+  icon: ReactNode
+}[] = [
+  {
+    role: 'client',
+    title: 'Ingresar como cliente',
+    subtitle: 'Necesito contratar cuidado',
+    description: 'Reserva cuidadores verificados, sube comprobantes y recibe seguimiento durante el servicio.',
+    icon: <HeartHandshake className="size-6" />,
+  },
+  {
+    role: 'caregiver',
+    title: 'Ingresar como cuidador',
+    subtitle: 'Quiero ofrecer mis servicios',
+    description: 'Registra tu perfil profesional, completa verificacion obligatoria y administra reservas.',
+    icon: <BriefcaseMedical className="size-6" />,
+  },
+]
 
 export function LandingPage() {
   const { canInstall, install } = useInstallPrompt()
 
   return (
     <div className="pb-24">
-      <section className="mx-auto grid max-w-7xl gap-14 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pt-20">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-white/75 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700 shadow-lg shadow-cyan-100/60 dark:border-cyan-400/20 dark:bg-slate-900/70 dark:text-cyan-300 dark:shadow-none">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-10 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8 lg:pt-16">
+        <div className="flex flex-col justify-center">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-500/20 bg-white/75 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700 shadow-lg shadow-cyan-100/60 dark:border-cyan-400/20 dark:bg-slate-900/70 dark:text-cyan-300 dark:shadow-none">
             <Sparkles className="size-4" />
-            PWA + Trust & Safety First
+            App movil de cuidado verificado
           </div>
           <h1 className="mt-8 font-display text-5xl leading-[1.02] text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
-            El marketplace premium para cuidado humano verificado.
+            Primero elige como quieres entrar.
           </h1>
           <p className="mt-8 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-            Red de Cuidados conecta familias, cuidadores y equipos operativos en una sola plataforma: reservas, verificacion de identidad, chat en vivo, pagos y administracion de calidad.
+            Red de Cuidados separa la experiencia desde el inicio: familias que necesitan apoyo y cuidadores que desean trabajar con verificacion, agenda, comprobantes y seguridad operativa.
           </p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link to="/auth/register">
-              <Button>Comenzar ahora</Button>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {canInstall ? <Button onClick={install}>Instalar app</Button> : null}
+            <Link to="/demo">
+              <Button variant="secondary">Ver demo de dashboards</Button>
             </Link>
-            <Link to="/client/search">
-              <Button variant="secondary">Explorar cuidadores</Button>
-            </Link>
-            {canInstall ? (
-              <Button variant="ghost" onClick={install}>
-                Instalar app
-              </Button>
-            ) : null}
           </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {[
-              ['12 min', 'Tiempo promedio de match'],
-              ['98.4%', 'Reservas completadas con exito'],
-              ['31 ciudades', 'Cobertura en expansion'],
-            ].map(([value, label]) => (
-              <div key={label} className="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-lg shadow-slate-200/40 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-none">
-                <p className="font-display text-3xl text-slate-950 dark:text-white">{value}</p>
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{label}</p>
-              </div>
-            ))}
-          </div>
+          <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">
+            El acceso admin se mantiene fuera de esta pantalla publica y solo queda disponible para operaciones internas.
+          </p>
         </div>
+
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="relative"
         >
-          <div className="absolute inset-0 -z-10 rounded-[40px] bg-[linear-gradient(135deg,_rgba(34,211,238,0.26),_rgba(15,23,42,0.06)_55%,_rgba(34,211,238,0.08))] blur-2xl dark:bg-[linear-gradient(135deg,_rgba(34,211,238,0.26),_rgba(15,23,42,0.36)_55%,_rgba(34,211,238,0.12))]" />
-          <div className="overflow-hidden rounded-[36px] border border-white/80 bg-white/85 p-6 shadow-2xl shadow-slate-300/40 backdrop-blur dark:border-white/10 dark:bg-slate-950/75 dark:shadow-none">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[28px] bg-slate-950 p-5 text-white dark:bg-slate-900">
-                <p className="text-sm text-white/60">Live operations</p>
-                <p className="mt-4 font-display text-4xl">2,418</p>
-                <p className="mt-2 text-sm text-white/65">Horas de cuidado reservadas esta semana</p>
-              </div>
-              <div className="rounded-[28px] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Verificacion</p>
-                    <p className="mt-2 font-display text-2xl text-slate-950 dark:text-white">31 expedientes</p>
+          <div className="absolute inset-0 -z-10 rounded-[48px] bg-[linear-gradient(135deg,_rgba(34,211,238,0.28),_rgba(15,23,42,0.06)_55%,_rgba(16,185,129,0.16))] blur-2xl dark:bg-[linear-gradient(135deg,_rgba(34,211,238,0.24),_rgba(15,23,42,0.45)_55%,_rgba(16,185,129,0.14))]" />
+          <div className="rounded-[42px] border border-white/80 bg-white/90 p-4 shadow-2xl shadow-slate-300/40 backdrop-blur dark:border-white/10 dark:bg-slate-950/80 dark:shadow-none sm:p-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              {roleCards.map((item) => (
+                <Link
+                  key={item.role}
+                  to={`/auth/access/${item.role}`}
+                  className="group rounded-[30px] border border-slate-200 bg-white/75 p-5 text-left text-slate-950 transition hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-100/50 dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:hover:shadow-none"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="rounded-2xl bg-cyan-50 p-3 text-cyan-600 transition group-hover:bg-slate-950 group-hover:text-white dark:bg-cyan-400/10 dark:text-cyan-300 dark:group-hover:bg-cyan-400 dark:group-hover:text-slate-950">
+                      {item.icon}
+                    </span>
+                    <BadgeCheck className="size-5 text-cyan-500 opacity-0 transition group-hover:opacity-100" />
                   </div>
-                  <BadgeCheck className="size-10 text-cyan-500" />
-                </div>
-                <div className="mt-5 h-2 rounded-full bg-slate-100 dark:bg-slate-800">
-                  <div className="h-2 w-3/4 rounded-full bg-cyan-500" />
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 rounded-[28px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-slate-900/70">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Top caregiver</p>
-                  <p className="mt-1 font-display text-2xl text-slate-950 dark:text-white">
-                    {caregivers[0].name}
-                  </p>
-                </div>
-                <img
-                  src={caregivers[0].image}
-                  alt={caregivers[0].name}
-                  className="size-16 rounded-2xl object-cover"
-                />
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <RatingStars value={caregivers[0].rating} />
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    {caregivers[0].specialty}
-                  </p>
-                </div>
-                <BookingModal caregiverName={caregivers[0].name} />
-              </div>
+                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{item.subtitle}</p>
+                  <h2 className="mt-2 font-display text-2xl">{item.title}</h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">{item.description}</p>
+                </Link>
+              ))}
             </div>
           </div>
         </motion.div>
@@ -117,47 +103,29 @@ export function LandingPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Por que Red de Cuidados"
-          title="Construida como una startup de alto crecimiento, no como un marketplace improvisado."
-          description="Arquitectura escalable, UX mobile-first, controles de confianza y workflows listos para equipos de operaciones."
+          eyebrow="Que hace Red de Cuidados"
+          title="Una plataforma completa para contratar y operar servicios de cuidado con mas confianza."
+          description="Despues de elegir tu rol, la app te lleva a una experiencia pensada para familias o cuidadores, con flujos separados, seguridad y seguimiento."
         />
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <InfoCard title="Identidad verificada" description="Cedula, biometria, OTP email y SMS en onboarding estricto." icon={<ShieldCheck className="size-5" />} />
-          <InfoCard title="Mensajeria viva" description="Chat estilo messenger, typing indicator, online status y adjuntos." icon={<MessageSquareMore className="size-5" />} />
-          <InfoCard title="Pagos listos" description="UI premium preparada para checkout, wallet y conciliacion." icon={<CreditCard className="size-5" />} />
-          <InfoCard title="Marketplace curado" description="Matching por disponibilidad, especialidad, urgencia e idioma." icon={<UsersRound className="size-5" />} />
+          <InfoCard title="Identidad verificada" description="Cedula, biometria, OTP email y SMS en onboarding estricto para cuidadores." icon={<ShieldCheck className="size-5" />} />
+          <InfoCard title="Reserva guiada" description="Calendario, rango horario, estimacion de precio y comprobante en un solo flujo." icon={<UserRoundCheck className="size-5" />} />
+          <InfoCard title="Mensajeria viva" description="Chat, evidencia por hora, entrada y salida del servicio para mayor tranquilidad." icon={<MessageSquareMore className="size-5" />} />
+          <InfoCard title="Comprobantes con AI" description="Los pagos se validan por comprobante con revision automatica y apoyo humano." icon={<BadgeCheck className="size-5" />} />
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <SectionHeading
-          eyebrow="Planes"
-          title="Modelo comercial listo para consumidores, premium y enterprise."
-          description="Cada plan esta disenado para escalar desde una familia hasta alianzas institucionales."
-        />
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          {pricingPlans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`rounded-[32px] border p-8 ${
-                plan.highlighted
-                  ? 'border-slate-950 bg-slate-950 text-white shadow-2xl shadow-slate-950/25 dark:border-cyan-400 dark:bg-cyan-400 dark:text-slate-950'
-                  : 'border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/70'
-              }`}
-            >
-              <p className="text-sm uppercase tracking-[0.24em] opacity-70">{plan.name}</p>
-              <p className="mt-4 font-display text-5xl">{plan.price}</p>
-              <p className="mt-4 text-sm leading-6 opacity-75">{plan.description}</p>
-              <ul className="mt-8 space-y-3 text-sm">
-                {plan.features.map((feature) => (
-                  <li key={feature}>• {feature}</li>
-                ))}
-              </ul>
-              <div className="mt-8">
-                <Button variant={plan.highlighted ? 'secondary' : 'primary'} fullWidth>
-                  Solicitar demo
-                </Button>
-              </div>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {[
+            ['Para familias', 'Encuentra apoyo por horas, emergencias, adulto mayor, infancia, discapacidad o asistencia en casa.'],
+            ['Para cuidadores', 'Administra zonas, tarifas, agenda, documentos, resenas y recordatorios de proximos servicios.'],
+            ['Para operaciones', 'El equipo interno revisa aprobaciones, comprobantes, reportes, fraude, auditoria y backups diarios.'],
+          ].map(([title, description]) => (
+            <div key={title} className="rounded-[32px] border border-slate-200 bg-white/85 p-7 shadow-lg shadow-slate-200/30 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-none">
+              <KeyRound className="size-6 text-cyan-500" />
+              <h3 className="mt-5 font-display text-2xl text-slate-950 dark:text-white">{title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">{description}</p>
             </div>
           ))}
         </div>
