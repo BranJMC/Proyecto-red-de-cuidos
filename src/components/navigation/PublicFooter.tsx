@@ -9,8 +9,8 @@ export function PublicFooter() {
         <div>
           <Logo />
           <p className="mt-4 max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
-            Startup-grade caregiving marketplace con verificacion, pagos, soporte,
-            operaciones y experiencia PWA lista para demo comercial.
+            Plataforma de cuidado con verificacion, pagos, soporte,
+            operaciones y experiencia PWA lista para uso real.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm text-slate-500 dark:text-slate-400">

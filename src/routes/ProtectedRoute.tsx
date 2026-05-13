@@ -10,8 +10,9 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
   const role = useAppStore((state) => state.user.role)
+  const authenticated = useAppStore((state) => state.authenticated)
 
-  if (!allowedRoles.includes(role)) {
+  if (!authenticated || !allowedRoles.includes(role)) {
     return <Navigate to="/" replace />
   }
 

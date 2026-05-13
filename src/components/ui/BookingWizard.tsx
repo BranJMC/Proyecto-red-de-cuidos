@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
-import { calendarDaysByCaregiver, caregivers, reviews, zones } from '../../services/mockData'
-import type { CalendarDayStatus, Caregiver } from '../../types'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { MessageCircleMore } from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
+import { mockApi } from '../../services/api'
+import { useAppStore } from '../../store/useAppStore'
+import type { CalendarDayStatus, Caregiver, Zone } from '../../types'
 import { Button } from './Button'
 import { MonthAvailabilityCalendar } from './MonthAvailabilityCalendar'
 import { PriceCalculatorCard } from './PriceCalculatorCard'
-import { RatingStars } from './RatingStars'
-import { ReceiptUploader } from './ReceiptUploader'
 
 const services = [
   'Elder care',
@@ -20,36 +22,63 @@ interface BookingWizardProps {
   caregiver?: Caregiver
 }
 
-export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps) {
-  const calendarDays = calendarDaysByCaregiver[caregiver.id] ?? []
-  const initialDay = calendarDays.find((day) => day.state === 'available') ?? calendarDays[0] ?? null
-  const [selectedDay, setSelectedDay] = useState<CalendarDayStatus | null>(initialDay)
-  const [serviceType, setServiceType] = useState(caregiver.serviceTypes[0] ?? services[0])
-  const [date, setDate] = useState(initialDay?.date ?? '2026-04-24')
-  const [startTime, setStartTime] = useState('08:00')
-  const [hours, setHours] = useState(4)
-  const [zone, setZone] = useState(caregiver.neighborhood)
-  const [coupon, setCoupon] = useState('FAMILY10')
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10)
+}
 
-  const caregiverReviews = reviews.filter((review) => review.caregiverName === caregiver.name)
-  const availableZones = zones.filter(
-    (item) =>
-      item.province === caregiver.province ||
-      item.city === caregiver.city ||
-      caregiver.zones.includes(item.province) ||
-      caregiver.zones.includes(item.city) ||
-      caregiver.zones.includes(item.neighborhood),
-  )
+export function BookingWizard({ caregiver }: BookingWizardProps) {
+  const [calendarDays, setCalendarDays] = useState<CalendarDayStatus[]>([])
+  const [zones, setZones] = useState<Zone[]>([])
+  const [selectedDay, setSelectedDay] = useState<CalendarDayStatus | null>(null)
+  const [serviceType, setServiceType] = useState('')
+  const [date, setDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [hours, setHours] = useState(4)
+  const [zone, setZone] = useState('')
+  const [coupon, setCoupon] = useState('')
+  const [addressLine, setAddressLine] = useState('')
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [startingConversation, setStartingConversation] = useState(false)
+  const user = useAppStore((state) => state.user)
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!caregiver) {
+      return
+    }
+
+    mockApi.getCaregiverCalendar(caregiver.id).then(setCalendarDays)
+    mockApi.getZones().then(setZones)
+  }, [caregiver])
+  const firstAvailableDay = calendarDays.find((day) => day.state === 'available') ?? calendarDays[0]
+  const activeDay = selectedDay ?? calendarDays.find((day) => day.date === date) ?? firstAvailableDay
+  const effectiveDate = date || activeDay?.date || getTodayDate()
+  const effectiveStartTime = startTime || activeDay?.timeRange?.split(' - ')[0] || '08:00'
 
   const pricing = useMemo(() => {
+    if (!caregiver) {
+      return {
+        hourlyRate: 0,
+        hours,
+        nightExtra: 0,
+        weekendExtra: 0,
+        emergencyExtra: 0,
+        platformFee: 0,
+        discount: 0,
+        total: 0,
+      }
+    }
+
     const hourlyRate = caregiver.pricePerHour
-    const nightExtra = startTime >= '18:00' ? caregiver.nightShiftFee : 0
-    const bookingDate = new Date(`${date}T12:00:00`)
+    const nightExtra = effectiveStartTime >= '18:00' ? caregiver.nightShiftFee : 0
+    const bookingDate = new Date(`${effectiveDate}T12:00:00`)
     const weekendExtra = [0, 6].includes(bookingDate.getDay()) ? caregiver.weekendFee : 0
     const emergencyExtra = serviceType === 'Emergency care' ? caregiver.emergencyFee : 0
     const base = hourlyRate * hours
     const platformFee = Math.round(base * 0.12)
-    const discount = coupon ? 10 : 0
+    const discount = coupon.trim() ? 10 : 0
 
     return {
       hourlyRate,
@@ -61,24 +90,84 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
       discount,
       total: base + nightExtra + weekendExtra + emergencyExtra + platformFee - discount,
     }
-  }, [caregiver, coupon, date, hours, serviceType, startTime])
+  }, [caregiver, coupon, effectiveDate, effectiveStartTime, hours, serviceType])
+
+  if (!caregiver) {
+    return null
+  }
+
+  const currentCaregiver = caregiver
+  const selectedServiceType = serviceType || currentCaregiver.serviceTypes[0] || services[0]
+  const selectedZone = zone || currentCaregiver.neighborhood || ''
+
+  const availableZones = zones.filter(
+    (item) =>
+      item.province === currentCaregiver.province ||
+      item.city === currentCaregiver.city ||
+      currentCaregiver.zones.includes(item.province) ||
+      currentCaregiver.zones.includes(item.city) ||
+      currentCaregiver.zones.includes(item.neighborhood),
+  )
+
+  async function handleCreateBooking() {
+    if (!user.id || user.role !== 'client') {
+      toast.error('Necesitas iniciar sesion', 'Entra como cliente para solicitar la reserva.')
+      navigate('/auth/access/client')
+      return
+    }
+
+    if (!addressLine.trim()) {
+      toast.error('Falta la direccion', 'Ingresa la direccion donde se brindara el servicio.')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const booking = await mockApi.createBooking({
+        clientId: user.id,
+        caregiverId: currentCaregiver.id,
+        serviceType: selectedServiceType,
+        date: effectiveDate,
+        startTime: effectiveStartTime,
+        hours,
+        addressLine,
+        notes: [selectedZone ? `Zona: ${selectedZone}` : '', notes].filter(Boolean).join('\n'),
+      })
+
+      toast.success('Reserva enviada', `Tu codigo de pago es ${booking.paymentReferenceCode}. Lo usaras luego en el motivo del deposito.`)
+      navigate('/client/bookings')
+    } catch {
+      toast.error('No se pudo reservar', 'La solicitud no pudo guardarse. Revisa los datos e intenta otra vez.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleSaveEstimate() {
+    const draft = {
+      caregiverId: currentCaregiver.id,
+      caregiverName: currentCaregiver.name,
+      serviceType: selectedServiceType,
+      date: effectiveDate,
+      startTime: effectiveStartTime,
+      hours,
+      zone: selectedZone,
+      addressLine,
+      notes,
+      total: pricing.total,
+    }
+
+    localStorage.setItem('red-cuidados-booking-draft', JSON.stringify(draft))
+    toast.success('Estimacion guardada', 'Dejamos este borrador en tu navegador para retomarlo luego.')
+  }
 
   return (
-    <div className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-      <div className="space-y-6">
-        <section className="rounded-[36px] border border-slate-200 bg-white/90 p-8 shadow-xl shadow-slate-200/40 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-none">
-          <p className="text-sm uppercase tracking-[0.24em] text-cyan-600 dark:text-cyan-300">Reserva guiada</p>
-          <h2 className="mt-2 font-display text-4xl text-slate-950 dark:text-white">Agenda con {caregiver.name}</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">
-            Elige un dia en el calendario y completa los datos de la reserva en el panel del mismo calendario.
-          </p>
-        </section>
-
+    <div className="space-y-6">
+      <div>
         <MonthAvailabilityCalendar
-          title="Disponibilidad del cuidador"
+          title={`Disponibilidad de ${caregiver.name}`}
           days={calendarDays}
-          selectedDate={date}
-          selectOnHover
+          selectedDate={effectiveDate}
           onSelect={(day) => {
             setSelectedDay(day)
             setDate(day.date)
@@ -90,13 +179,24 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
             }
           }}
         >
-          <div className="rounded-[28px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-slate-800/45">
-            <h3 className="font-display text-2xl text-slate-950 dark:text-white">Formulario del dia</h3>
-            {selectedDay ? (
+          <div className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-4 sm:p-5 dark:border-white/10 dark:bg-slate-800/45">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h3 className="font-display text-xl text-slate-950 sm:text-2xl dark:text-white">Solicitar servicio</h3>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  La fecha seleccionada queda fija hasta que hagas clic en otro dia.
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white px-4 py-3 text-right shadow-sm dark:bg-slate-900">
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-600 dark:text-cyan-300">Fecha activa</p>
+                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{effectiveDate}</p>
+              </div>
+            </div>
+            {activeDay ? (
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                {selectedDay.date} | {selectedDay.state}
-                {selectedDay.serviceType ? ` | ${selectedDay.serviceType}` : ''}
-                {selectedDay.timeRange ? ` | ${selectedDay.timeRange}` : ''}
+                {activeDay.date} | {activeDay.state}
+                {activeDay.serviceType ? ` | ${activeDay.serviceType}` : ''}
+                {activeDay.timeRange ? ` | ${activeDay.timeRange}` : ''}
               </p>
             ) : (
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -107,8 +207,8 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
             <div className="mt-5 grid gap-4">
               <div>
                 <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Tipo de cuido</label>
-                <select className="field" value={serviceType} onChange={(event) => setServiceType(event.target.value)}>
-                  {[...new Set([...caregiver.serviceTypes, ...services])].map((service) => (
+                <select className="field" value={selectedServiceType} onChange={(event) => setServiceType(event.target.value)}>
+                  {[...new Set([...currentCaregiver.serviceTypes, ...services])].map((service) => (
                     <option key={service}>{service}</option>
                   ))}
                 </select>
@@ -116,14 +216,14 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Fecha</label>
-                  <input className="field" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+                  <input className="field" type="date" value={effectiveDate} onChange={(event) => setDate(event.target.value)} />
                 </div>
                 <div>
                   <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Hora de inicio</label>
                   <input
                     className="field"
                     type="time"
-                    value={startTime}
+                    value={effectiveStartTime}
                     onChange={(event) => setStartTime(event.target.value)}
                   />
                 </div>
@@ -137,7 +237,7 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
                     min={1}
                     max={24}
                     value={hours}
-                    onChange={(event) => setHours(Number(event.target.value))}
+                    onChange={(event) => setHours(Math.max(1, Number(event.target.value) || 1))}
                   />
                 </div>
                 <div>
@@ -147,7 +247,8 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
               </div>
               <div>
                 <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Zona</label>
-                <select className="field" value={zone} onChange={(event) => setZone(event.target.value)}>
+                <select className="field" value={selectedZone} onChange={(event) => setZone(event.target.value)}>
+                  <option value="">Selecciona una zona</option>
                   {availableZones.map((item) => (
                     <option key={item.id} value={item.neighborhood}>
                       {item.province} | {item.city} | {item.neighborhood}
@@ -155,48 +256,70 @@ export function BookingWizard({ caregiver = caregivers[0] }: BookingWizardProps)
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Direccion del servicio</label>
+                <input
+                  className="field"
+                  placeholder="Ej. Condominio Los Arcos, casa 12"
+                  value={addressLine}
+                  onChange={(event) => setAddressLine(event.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Notas</label>
+                <textarea
+                  className="field min-h-28"
+                  placeholder="Rutina, alergias, medicacion o detalles importantes"
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                />
+              </div>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button>Continuar a reserva</Button>
-              <Button variant="secondary">Guardar estimacion</Button>
+              <Button onClick={handleCreateBooking} disabled={saving}>
+                {saving ? 'Enviando...' : 'Solicitar reserva'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  if (!user.id || user.role !== 'client') {
+                    toast.error('Necesitas iniciar sesion', 'Entra como cliente para abrir el chat con el cuidador.')
+                    navigate('/auth/access/client')
+                    return
+                  }
+
+                  setStartingConversation(true)
+                  try {
+                    const response = await mockApi.startConversation({
+                      requesterId: user.id,
+                      targetUserId: currentCaregiver.id,
+                      initialMessage: `Hola ${currentCaregiver.name}, quisiera saber mas sobre tu servicio para el ${effectiveDate}.`,
+                    })
+                    toast.success('Conversacion lista', 'Ya puedes continuar esta conversacion en Mensajes.')
+                    navigate(`/client/messages?thread=${response.conversationId}`)
+                  } catch {
+                    toast.error('No se pudo abrir el chat', 'Intenta nuevamente en unos segundos.')
+                  } finally {
+                    setStartingConversation(false)
+                  }
+                }}
+                disabled={startingConversation}
+              >
+                <MessageCircleMore className="mr-2 size-4" />
+                {startingConversation ? 'Abriendo chat...' : 'Hablar antes de reservar'}
+              </Button>
+              <Button variant="secondary" onClick={handleSaveEstimate}>
+                Guardar estimacion
+              </Button>
             </div>
           </div>
         </MonthAvailabilityCalendar>
-
-        <ReceiptUploader />
-
-        <section className="rounded-[32px] border border-slate-200 bg-white/90 p-6 dark:border-white/10 dark:bg-slate-900/75">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h3 className="font-display text-2xl text-slate-950 dark:text-white">Resenas anteriores del cuidador</h3>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Historial publico para decidir con mas confianza antes de reservar.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <RatingStars value={caregiver.rating} />
-              <span className="text-sm text-slate-500 dark:text-slate-400">{caregiver.reviews} resenas</span>
-            </div>
-          </div>
-          <div className="mt-5 space-y-3">
-            {caregiverReviews.map((review) => (
-              <div key={review.id} className="rounded-2xl bg-slate-50 px-4 py-4 dark:bg-slate-800/60">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-slate-950 dark:text-white">{review.author}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{review.date}</p>
-                  </div>
-                  <RatingStars value={review.rating} />
-                </div>
-                <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{review.comment}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
-      <PriceCalculatorCard summary={pricing} />
+      <div className="2xl:max-w-sm">
+        <PriceCalculatorCard summary={pricing} />
+      </div>
     </div>
   )
 }

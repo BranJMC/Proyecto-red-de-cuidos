@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { verificationSteps } from '../../services/mockData'
+import { mockApi } from '../../services/api'
 import { Button } from '../../components/ui/Button'
 import { CameraCapture } from '../../components/ui/CameraCapture'
 import { FileUploader } from '../../components/ui/FileUploader'
 import { OtpInput } from '../../components/ui/OtpInput'
+import { useToast } from '../../hooks/useToast'
+import type { VerificationStep } from '../../types'
 
 const cedulaSchema = z.object({
   idNumber: z
@@ -16,12 +18,50 @@ const cedulaSchema = z.object({
     .regex(/^[0-9-]+$/, 'Solo numeros y guiones'),
 })
 
-export function CaregiverOnboardingWizard({ preAccess = false }: { preAccess?: boolean }) {
+export function CaregiverOnboardingWizard({
+  preAccess = false,
+  caregiverId,
+}: {
+  preAccess?: boolean
+  caregiverId?: string
+}) {
   const [step, setStep] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [verificationSteps, setVerificationSteps] = useState<VerificationStep[]>([])
+  const toast = useToast()
   const form = useForm<z.infer<typeof cedulaSchema>>({
     resolver: zodResolver(cedulaSchema),
     defaultValues: { idNumber: '1-1234-5678' },
   })
+
+  async function submitVerification() {
+    if (!caregiverId) {
+      setStep(3)
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      await mockApi.submitCaregiverVerification({
+        caregiverId,
+        idNumber: form.getValues('idNumber'),
+      })
+      toast.success('Expediente enviado', 'Tu verificacion quedo registrada en la base de datos.')
+      setStep(3)
+    } catch {
+      toast.error('No se pudo enviar', 'Revisa la conexion del backend e intenta de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!caregiverId) {
+      return
+    }
+
+    mockApi.getVerificationStepsByCaregiver(caregiverId).then(setVerificationSteps)
+  }, [caregiverId, step])
 
   const steps = [
     {
@@ -73,7 +113,9 @@ export function CaregiverOnboardingWizard({ preAccess = false }: { preAccess?: b
             </div>
           </div>
           <div className="lg:col-span-2 flex justify-end">
-            <Button onClick={() => setStep(3)}>{preAccess ? 'Enviar a revision' : 'Finalizar onboarding'}</Button>
+            <Button onClick={submitVerification} disabled={submitting}>
+              {submitting ? 'Enviando...' : preAccess ? 'Enviar a revision' : 'Finalizar onboarding'}
+            </Button>
           </div>
         </div>
       ),

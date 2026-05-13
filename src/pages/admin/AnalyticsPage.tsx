@@ -1,8 +1,18 @@
+import { useEffect, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { platformSeries, zones } from '../../services/mockData'
 import { ChartCard } from '../../components/ui/ChartCard'
+import { mockApi } from '../../services/api'
+import type { Zone } from '../../types'
 
 export function AnalyticsPage() {
+  const [platformSeries, setPlatformSeries] = useState<Record<string, number | string>[]>([])
+  const [zones, setZones] = useState<Zone[]>([])
+
+  useEffect(() => {
+    mockApi.getPlatformSeries().then(setPlatformSeries)
+    mockApi.getZones().then(setZones)
+  }, [])
+
   return (
     <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
       <ChartCard title="Earnings analytics" subtitle="Crecimiento de ingresos mensuales de la plataforma.">
@@ -16,10 +26,10 @@ export function AnalyticsPage() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-              <XAxis dataKey="name" stroke="#64748b" />
+              <XAxis dataKey="label" stroke="#64748b" />
               <YAxis stroke="#64748b" />
               <Tooltip />
-              <Area type="monotone" dataKey="ingresos" stroke="#0891b2" fill="url(#income)" />
+              <Area type="monotone" dataKey="payments" stroke="#0891b2" fill="url(#income)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

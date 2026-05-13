@@ -1,12 +1,43 @@
+import { useEffect, useState } from 'react'
 import { Heart, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { caregivers, reviews } from '../../services/mockData'
+import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import { RatingStars } from '../../components/ui/RatingStars'
+import type { Caregiver, Review } from '../../types'
 
 export function BookingPage() {
+  const [caregivers, setCaregivers] = useState<Caregiver[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
   const favorites = useAppStore((state) => state.favorites)
-  const toggleFavorite = useAppStore((state) => state.toggleFavorite)
+  const user = useAppStore((state) => state.user)
+  const setFavorites = useAppStore((state) => state.setFavorites)
+  const toggleFavoriteLocal = useAppStore((state) => state.toggleFavorite)
+
+  useEffect(() => {
+    mockApi.getCaregivers().then(setCaregivers)
+    mockApi.getReviews().then(setReviews)
+  }, [])
+
+  useEffect(() => {
+    if (!user.id || user.role !== 'client') {
+      return
+    }
+
+    mockApi.getFavorites(user.id).then(setFavorites)
+  }, [setFavorites, user.id, user.role])
+
+  async function toggleFavorite(caregiverId: string) {
+    if (!user.id || user.role !== 'client') {
+      toggleFavoriteLocal(caregiverId)
+      return
+    }
+
+    const response = await mockApi.toggleFavorite(user.id, caregiverId)
+    setFavorites(
+      response.favorite ? [...new Set([...favorites, caregiverId])] : favorites.filter((id) => id !== caregiverId),
+    )
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -18,7 +49,7 @@ export function BookingPage() {
         </p>
       </div>
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        {caregivers.map((caregiver) => {
+        {caregivers.filter((caregiver) => caregiver.verified).map((caregiver) => {
           const caregiverReviews = reviews.filter((review) => review.caregiverName === caregiver.name).slice(0, 2)
           return (
             <article key={caregiver.id} className="rounded-[34px] border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-200/30 dark:border-white/10 dark:bg-slate-900/75 dark:shadow-none">

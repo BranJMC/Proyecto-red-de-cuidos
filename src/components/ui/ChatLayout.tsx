@@ -1,4 +1,5 @@
 import { Camera, Clock3, ImagePlus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import type { MessageThread, ServiceUpdate, ShiftLog } from '../../types'
 import { initials } from '../../utils/helpers'
 import { Button } from './Button'
@@ -7,12 +8,56 @@ export function ChatLayout({
   threads,
   shiftLog,
   hourlyUpdates,
+  initialThreadId,
+  onSendMessage,
+  onCheckIn,
+  onCheckOut,
 }: {
   threads: MessageThread[]
   shiftLog?: ShiftLog
   hourlyUpdates?: ServiceUpdate[]
+  initialThreadId?: string | null
+  onSendMessage?: (payload: { conversationId: string; content: string }) => Promise<void>
+  onCheckIn?: (bookingId: string) => Promise<void>
+  onCheckOut?: (bookingId: string) => Promise<void>
 }) {
-  const activeThread = threads[0]
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+  const [draftMessage, setDraftMessage] = useState('')
+  const [sending, setSending] = useState(false)
+
+  const resolvedThreadId =
+    activeThreadId ?? (initialThreadId && threads.some((thread) => thread.id === initialThreadId) ? initialThreadId : null)
+
+  const activeThread = useMemo(
+    () => threads.find((thread) => thread.id === resolvedThreadId) ?? threads[0],
+    [resolvedThreadId, threads],
+  )
+
+  if (!threads.length || !activeThread) {
+    return (
+      <div className="rounded-[32px] border border-slate-200 bg-white/85 p-6 dark:border-white/10 dark:bg-slate-900/70">
+        <h3 className="font-display text-2xl text-slate-950 dark:text-white">Sin conversaciones aun</h3>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          Cuando tengas una reserva activa o soporte responda, el chat aparecera aqui.
+        </p>
+      </div>
+    )
+  }
+
+  async function handleSendMessage() {
+    const content = draftMessage.trim()
+    if (!content || !onSendMessage) {
+      return
+    }
+
+    setSending(true)
+    try {
+      await onSendMessage({ conversationId: activeThread.id, content })
+      setDraftMessage('')
+    } finally {
+      setSending(false)
+    }
+  }
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -25,6 +70,8 @@ export function ChatLayout({
           {threads.map((thread) => (
             <button
               key={thread.id}
+              type="button"
+              onClick={() => setActiveThreadId(thread.id)}
               className={`flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition ${
                 thread.id === activeThread.id
                   ? 'bg-slate-950 text-white dark:bg-cyan-400 dark:text-slate-950'
@@ -49,16 +96,18 @@ export function ChatLayout({
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-white/10">
           <div>
             <h3 className="font-display text-2xl text-slate-950 dark:text-white">{activeThread.participant}</h3>
-            <p className="text-sm text-emerald-500">{activeThread.status === 'online' ? 'En linea' : 'Fuera de linea'} • escribiendo...</p>
+            <p className="text-sm text-emerald-500">{activeThread.status === 'online' ? 'En linea' : 'Fuera de linea'}</p>
           </div>
-          <Button variant="secondary">Ver perfil</Button>
+          <Button variant="secondary" disabled>
+            Ver perfil
+          </Button>
         </div>
         <div className="sticky top-20 z-10 mt-5 rounded-[28px] border border-slate-200 bg-white/95 p-4 shadow-lg shadow-slate-200/30 backdrop-blur dark:border-white/10 dark:bg-slate-900/95 dark:shadow-none">
           <div className="mb-4 flex items-center justify-between gap-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Escribe sin tener que bajar al final de la conversacion.
             </p>
-            <Button variant="secondary">
+            <Button variant="secondary" disabled>
               <Camera className="mr-2 size-4" />
               Evidencia
             </Button>
@@ -67,12 +116,22 @@ export function ChatLayout({
             <input
               className="min-h-12 flex-1 rounded-2xl bg-slate-50 px-4 text-sm text-slate-700 outline-none dark:bg-slate-800 dark:text-slate-200"
               placeholder="Escribe un mensaje o status del servicio..."
+              value={draftMessage}
+              onChange={(event) => setDraftMessage(event.target.value)}
+              onKeyDown={async (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault()
+                  await handleSendMessage()
+                }
+              }}
             />
-            <Button variant="secondary">
+            <Button variant="secondary" disabled>
               <ImagePlus className="mr-2 size-4" />
               Imagen
             </Button>
-            <Button>Enviar</Button>
+            <Button onClick={handleSendMessage} disabled={sending || !draftMessage.trim()}>
+              {sending ? 'Enviando...' : 'Enviar'}
+            </Button>
           </div>
         </div>
         <div className="space-y-4 py-6">
@@ -97,15 +156,17 @@ export function ChatLayout({
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-cyan-600 dark:text-cyan-300">Control horario</p>
                 <h4 className="mt-2 font-display text-2xl text-slate-950 dark:text-white">
-                  Entrada {shiftLog.checkIn} {shiftLog.checkOut ? `• Salida ${shiftLog.checkOut}` : '• Servicio en curso'}
+                  Entrada {shiftLog.checkIn} {shiftLog.checkOut ? `| Salida ${shiftLog.checkOut}` : '| Servicio en curso'}
                 </h4>
               </div>
               <div className="flex gap-3">
-                <Button variant="secondary">
+                <Button variant="secondary" onClick={() => shiftLog && onCheckIn?.(shiftLog.bookingId)} disabled={!shiftLog || shiftLog.status !== 'pending-start'}>
                   <Clock3 className="mr-2 size-4" />
                   Marcar entrada
                 </Button>
-                <Button>Marcar salida</Button>
+                <Button onClick={() => shiftLog && onCheckOut?.(shiftLog.bookingId)} disabled={!shiftLog || shiftLog.status !== 'in-progress'}>
+                  Marcar salida
+                </Button>
               </div>
             </div>
           </div>

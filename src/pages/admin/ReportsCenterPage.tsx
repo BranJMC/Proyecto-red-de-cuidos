@@ -1,18 +1,35 @@
-import { useState } from 'react'
-import { complaints } from '../../services/mockData'
+import { useEffect, useState } from 'react'
+import { mockApi } from '../../services/api'
+import { useToast } from '../../hooks/useToast'
+import type { Complaint } from '../../types'
 import { statusTone } from '../../utils/helpers'
 
 type ReportStatus = 'pendiente' | 'en transito' | 'resuelto'
 
-const initialStatuses: Record<string, ReportStatus> = Object.fromEntries(
-  complaints.map((report) => [
-    report.id,
-    report.status === 'resolved' ? 'resuelto' : report.status === 'investigating' ? 'en transito' : 'pendiente',
-  ]),
-)
-
 export function ReportsCenterPage() {
-  const [statuses, setStatuses] = useState(initialStatuses)
+  const [complaints, setComplaints] = useState<Complaint[]>([])
+  const [statuses, setStatuses] = useState<Record<string, ReportStatus>>({})
+  const toast = useToast()
+
+  useEffect(() => {
+    mockApi.getReports().then((items) => {
+      setComplaints(items)
+      setStatuses(
+        Object.fromEntries(
+          items.map((report) => [
+            report.id,
+            report.status === 'resolved' ? 'resuelto' : report.status === 'investigating' ? 'en transito' : 'pendiente',
+          ]),
+        ),
+      )
+    })
+  }, [])
+
+  async function handleStatusChange(reportId: string, nextStatus: ReportStatus) {
+    setStatuses((current) => ({ ...current, [reportId]: nextStatus }))
+    await mockApi.updateReportStatus(reportId, nextStatus)
+    toast.success('Reporte actualizado', 'El nuevo estado ya quedo persistido.')
+  }
 
   return (
     <div className="grid gap-5 md:grid-cols-2">
@@ -35,12 +52,7 @@ export function ReportsCenterPage() {
             <select
               className="field mt-2"
               value={status}
-              onChange={(event) =>
-                setStatuses((current) => ({
-                  ...current,
-                  [report.id]: event.target.value as ReportStatus,
-                }))
-              }
+              onChange={(event) => handleStatusChange(report.id, event.target.value as ReportStatus)}
             >
               <option value="pendiente">Pendiente</option>
               <option value="en transito">En transito</option>

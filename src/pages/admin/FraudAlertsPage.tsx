@@ -1,7 +1,15 @@
-import { fraudAlerts } from '../../services/mockData'
+import { useEffect, useState } from 'react'
+import { mockApi } from '../../services/api'
+import type { FraudAlert } from '../../types'
 import { statusTone } from '../../utils/helpers'
 
 export function FraudAlertsPage() {
+  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[]>([])
+
+  useEffect(() => {
+    mockApi.getFraudAlerts().then(setFraudAlerts)
+  }, [])
+
   return (
     <div className="space-y-4">
       {fraudAlerts.map((alert) => (

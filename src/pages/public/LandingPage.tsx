@@ -57,13 +57,10 @@ export function LandingPage() {
             Primero elige como quieres entrar.
           </h1>
           <p className="mt-8 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-            Red de Cuidados separa la experiencia desde el inicio: familias que necesitan apoyo y cuidadores que desean trabajar con verificacion, agenda, comprobantes y seguridad operativa.
+            CareWy separa la experiencia desde el inicio: familias que necesitan apoyo y cuidadores que desean trabajar con verificacion, agenda, comprobantes y seguridad operativa.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             {canInstall ? <Button onClick={install}>Instalar app</Button> : null}
-            <Link to="/demo">
-              <Button variant="secondary">Ver demo de dashboards</Button>
-            </Link>
           </div>
           <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">
             El acceso admin se mantiene fuera de esta pantalla publica y solo queda disponible para operaciones internas.
@@ -103,7 +100,7 @@ export function LandingPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Que hace Red de Cuidados"
+          eyebrow="Que hace CareWy"
           title="Una plataforma completa para contratar y operar servicios de cuidado con mas confianza."
           description="Despues de elegir tu rol, la app te lleva a una experiencia pensada para familias o cuidadores, con flujos separados, seguridad y seguimiento."
         />

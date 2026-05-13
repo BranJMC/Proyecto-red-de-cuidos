@@ -1,9 +1,7 @@
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { publicNav } from '../../utils/constants'
 import { Logo } from '../branding/Logo'
-import { Button } from '../ui/Button'
 import { MobileMenu } from './MobileMenu'
-import { ThemeToggle } from './ThemeToggle'
 
 export function Navbar() {
   return (
@@ -27,13 +25,7 @@ export function Navbar() {
             </NavLink>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 lg:flex">
-          <ThemeToggle />
-          <Link to="/demo">
-            <Button variant="secondary">Demo mode</Button>
-          </Link>
-        </div>
-        <MobileMenu items={[...publicNav, { label: 'Demo', href: '/demo' }]} />
+        <MobileMenu items={publicNav} />
       </div>
     </header>
   )

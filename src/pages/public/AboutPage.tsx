@@ -6,7 +6,7 @@ export function AboutPage() {
       <SectionHeading
         eyebrow="Sobre nosotros"
         title="Convertimos el cuidado en una experiencia confiable, elegante y operativamente impecable."
-        description="Red de Cuidados nace para resolver una tension real: encontrar a la persona indicada con la rapidez de una app moderna y la seguridad de un proceso humano serio."
+        description="CareWy nace para resolver una tension real: encontrar a la persona indicada con la rapidez de una app moderna y la seguridad de un proceso humano serio."
       />
       <div className="mt-10 grid gap-5 md:grid-cols-3">
         {[

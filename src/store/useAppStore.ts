@@ -1,13 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import {
-  caregivers,
-  messageThreads,
-  notifications,
-  savedSearches,
-} from '../services/mockData'
-import { demoUsers } from '../utils/constants'
-import type { NotificationItem, SavedSearch, UserRole } from '../types'
+import type { MessageThread, NotificationItem, SavedSearch, UserRole } from '../types'
 
 interface ToastState {
   id: string
@@ -18,53 +11,97 @@ interface ToastState {
 interface AppState {
   theme: 'light' | 'dark'
   user: {
+    id?: string
     name: string
     email: string
     role: UserRole
     title: string
     avatar: string
   }
-  demoMode: boolean
+  token: string | null
+  authenticated: boolean
   favorites: string[]
   notifications: NotificationItem[]
-  threads: typeof messageThreads
+  threads: MessageThread[]
   savedSearches: SavedSearch[]
   toasts: ToastState[]
   setTheme: (theme: 'light' | 'dark') => void
   setRole: (role: UserRole) => void
-  enterDemo: (role: UserRole) => void
-  exitDemo: () => void
+  setSession: (payload: {
+    token: string
+    user: {
+      id: string
+      name: string
+      email: string
+      role: UserRole
+      title: string
+      avatar: string
+    }
+  }) => void
+  updateUserProfile: (payload: { name: string; phone?: string; avatar?: string }) => void
+  clearSession: () => void
   toggleFavorite: (caregiverId: string) => void
+  setFavorites: (favorites: string[]) => void
+  setNotifications: (notifications: NotificationItem[]) => void
+  setThreads: (threads: MessageThread[]) => void
+  setSavedSearches: (savedSearches: SavedSearch[]) => void
   pushToast: (toast: Omit<ToastState, 'id'>) => void
   dismissToast: (id: string) => void
   markNotificationsRead: () => void
+}
+
+const emptyUser = {
+  id: undefined,
+  name: '',
+  email: '',
+  role: 'client' as UserRole,
+  title: '',
+  avatar: '',
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       theme: 'light',
-      user: demoUsers.client,
-      demoMode: true,
-      favorites: caregivers.slice(0, 3).map((caregiver) => caregiver.id),
-      notifications,
-      threads: messageThreads,
-      savedSearches,
+      user: emptyUser,
+      token: null,
+      authenticated: false,
+      favorites: [],
+      notifications: [],
+      threads: [],
+      savedSearches: [],
       toasts: [],
       setTheme: (theme) => set({ theme }),
       setRole: (role) =>
-        set(() => ({
-          user: demoUsers[role],
+        set((state) => ({
+          user: {
+            ...state.user,
+            role,
+          },
         })),
-      enterDemo: (role) =>
+      setSession: ({ token, user }) =>
         set(() => ({
-          demoMode: true,
-          user: demoUsers[role],
+          token,
+          authenticated: true,
+          user,
         })),
-      exitDemo: () =>
+      updateUserProfile: ({ name, avatar }) =>
+        set((state) => ({
+          user: {
+            ...state.user,
+            name,
+            avatar: avatar ?? state.user.avatar,
+          },
+        })),
+      clearSession: () =>
         set(() => ({
-          demoMode: false,
-          user: demoUsers.client,
+          token: null,
+          authenticated: false,
+          favorites: [],
+          notifications: [],
+          threads: [],
+          savedSearches: [],
+          user: emptyUser,
         })),
       toggleFavorite: (caregiverId) =>
         set((state) => ({
@@ -72,6 +109,10 @@ export const useAppStore = create<AppState>()(
             ? state.favorites.filter((id) => id !== caregiverId)
             : [...state.favorites, caregiverId],
         })),
+      setFavorites: (favorites) => set({ favorites }),
+      setNotifications: (notifications) => set({ notifications }),
+      setThreads: (threads) => set({ threads }),
+      setSavedSearches: (savedSearches) => set({ savedSearches }),
       pushToast: (toast) =>
         set((state) => ({
           toasts: [...state.toasts, { id: crypto.randomUUID(), ...toast }],
@@ -85,6 +126,20 @@ export const useAppStore = create<AppState>()(
           notifications: state.notifications.map((item) => ({ ...item, read: true })),
         })),
     }),
-    { name: 'red-cuidados-store' },
+    {
+      name: 'red-cuidados-store',
+      version: 2,
+      migrate: () => ({
+        theme: 'light',
+        user: emptyUser,
+        token: null,
+        authenticated: false,
+        favorites: [],
+        notifications: [],
+        threads: [],
+        savedSearches: [],
+        toasts: [],
+      }),
+    },
   ),
 )

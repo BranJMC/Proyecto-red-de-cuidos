@@ -1,33 +1,79 @@
-import { clientBookings, reviews } from '../../services/mockData'
+import { useEffect, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { RatingStars } from '../../components/ui/RatingStars'
+import { useToast } from '../../hooks/useToast'
+import { mockApi } from '../../services/api'
+import { useAppStore } from '../../store/useAppStore'
+import type { Booking, Review } from '../../types'
 
 export function ClientReviewsPage() {
+  const [clientBookings, setClientBookings] = useState<Booking[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [selectedBookingId, setSelectedBookingId] = useState('')
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const user = useAppStore((state) => state.user)
+  const toast = useToast()
+
+  useEffect(() => {
+    if (!user.id) {
+      return
+    }
+
+    mockApi.getBookingsByUser(user.id, 'client').then(setClientBookings)
+    mockApi.getReviews().then(setReviews)
+  }, [user.id])
+
+  async function publishReview() {
+    const booking = clientBookings.find((item) => item.id === selectedBookingId)
+    if (!booking || !user.id || !comment.trim()) {
+      toast.error('Faltan datos', 'Selecciona una reserva y escribe tu comentario antes de publicar.')
+      return
+    }
+
+    await mockApi.createReview({
+      bookingId: booking.id,
+      clientId: user.id,
+      caregiverId: booking.caregiverId,
+      rating,
+      comment,
+    })
+    setReviews(await mockApi.getReviews())
+    setComment('')
+    toast.success('Resena publicada', 'Tu resena ya quedo guardada en la base de datos.')
+  }
+
   return (
     <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
       <section className="rounded-[32px] border border-slate-200 bg-white/85 p-8 dark:border-white/10 dark:bg-slate-900/70">
-        <h2 className="font-display text-3xl text-slate-950 dark:text-white">Escribir una reseña</h2>
+        <h2 className="font-display text-3xl text-slate-950 dark:text-white">Escribir una resena</h2>
         <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-          Solo puedes reseñar cuidadores con los que ya tengas servicios registrados.
+          Solo puedes resenar cuidadores con los que ya tengas servicios registrados.
         </p>
         <div className="mt-8 grid gap-4">
-          <select className="field">
-            <option>Selecciona un cuidador</option>
+          <select className="field" value={selectedBookingId} onChange={(event) => setSelectedBookingId(event.target.value)}>
+            <option value="">Selecciona un cuidador</option>
             {clientBookings.map((booking) => (
-              <option key={booking.id}>{booking.caregiverName} • {booking.service}</option>
+              <option key={booking.id} value={booking.id}>
+                {booking.caregiverName} • {booking.service}
+              </option>
             ))}
           </select>
-          <select className="field">
-            <option>Calificación</option>
-            <option>5 estrellas</option>
-            <option>4 estrellas</option>
-            <option>3 estrellas</option>
-            <option>2 estrellas</option>
-            <option>1 estrella</option>
+          <select className="field" value={rating} onChange={(event) => setRating(Number(event.target.value))}>
+            <option value={5}>5 estrellas</option>
+            <option value={4}>4 estrellas</option>
+            <option value={3}>3 estrellas</option>
+            <option value={2}>2 estrellas</option>
+            <option value={1}>1 estrella</option>
           </select>
-          <textarea className="field min-h-40" placeholder="Describe tu experiencia con el servicio recibido" />
+          <textarea
+            className="field min-h-40"
+            placeholder="Describe tu experiencia con el servicio recibido"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+          />
         </div>
-        <Button className="mt-6">Publicar reseña</Button>
+        <Button className="mt-6" onClick={publishReview}>Publicar resena</Button>
       </section>
       <section className="space-y-4">
         {reviews.map((review) => (

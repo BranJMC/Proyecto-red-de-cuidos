@@ -17,7 +17,7 @@ export function Button({
 }: ButtonProps) {
   const variants: Record<Variant, string> = {
     primary:
-      'bg-slate-950 text-white shadow-lg shadow-slate-950/20 hover:bg-slate-800 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300',
+      'bg-slate-950 text-white shadow-lg shadow-slate-950/20 hover:bg-slate-800 dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500',
     secondary:
       'bg-white/80 text-slate-950 ring-1 ring-slate-200 hover:bg-white dark:bg-slate-900 dark:text-white dark:ring-white/10 dark:hover:bg-slate-800',
     ghost:

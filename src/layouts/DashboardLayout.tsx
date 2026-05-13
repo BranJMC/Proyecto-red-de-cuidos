@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Outlet, useLocation } from 'react-router-dom'
 import { NotificationBell } from '../components/ui/NotificationBell'
 import { Sidebar } from '../components/navigation/Sidebar'
-import { ThemeToggle } from '../components/navigation/ThemeToggle'
+import { UserMenu } from '../components/navigation/UserMenu'
 import { dashboardNav } from '../utils/constants'
 import type { UserRole } from '../types'
 import { MobileMenu } from '../components/navigation/MobileMenu'
@@ -22,12 +22,12 @@ export function DashboardLayout({ role }: { role: UserRole }) {
               <MobileMenu items={dashboardNav[role]} />
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Hola</p>
-                <h1 className="font-display text-xl text-slate-950 dark:text-white">{user.name}</h1>
+                <h1 className="font-display text-xl text-slate-950 dark:text-white">{user.name || 'Tu panel'}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <ThemeToggle />
               <NotificationBell />
+              <UserMenu />
             </div>
           </div>
         </header>

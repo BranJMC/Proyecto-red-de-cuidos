@@ -17,6 +17,15 @@ export interface DemoUser {
   avatar: string
 }
 
+export interface AccountProfile {
+  id: string
+  fullName: string
+  email: string
+  phone: string
+  role: UserRole
+  avatar: string
+}
+
 export interface Zone {
   id: string
   province: string
@@ -68,12 +77,40 @@ export interface Booking {
   clientName: string
   service: string
   zone: string
+  addressLine?: string
   date: string
   startTime: string
   duration: string
   hours: number
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   amount: number
+  paymentReferenceCode?: string
+}
+
+export interface CaregiverEarningsSummary {
+  totalReceived: number
+  totalProofs: number
+  todayReceived: number
+  daily: Array<{
+    label: string
+    amount: number
+  }>
+  payments: Array<{
+    id: string
+    proofId?: string
+    bookingId?: string
+    date: string
+    clientName: string
+    amount: number
+    method: string
+    referenceNumber?: string
+    expectedReferenceCode?: string
+    status?: 'Pending Review' | 'Approved' | 'Rejected'
+    aiDecision?: 'approved' | 'manual-review' | 'rejected'
+    reviewedBy?: string
+    fileUrl?: string
+    fileName?: string
+  }>
 }
 
 export interface NotificationItem {
@@ -87,6 +124,8 @@ export interface NotificationItem {
 
 export interface MessageThread {
   id: string
+  bookingId?: string
+  participantId?: string
   participant: string
   role: UserRole
   status: 'online' | 'offline'
@@ -119,6 +158,49 @@ export interface ShiftLog {
   checkIn: string
   checkOut?: string
   status: 'pending-start' | 'in-progress' | 'checked-out'
+}
+
+export interface PlatformSettings {
+  verificationSlaHours: number
+  supportPremiumEnabled: boolean
+  paymentAiEnabled: boolean
+  pushNotificationsEnabled: boolean
+}
+
+export interface CaregiverWorkingHour {
+  id?: string
+  dayOfWeek: number
+  active: boolean
+  startTime: string
+  endTime: string
+}
+
+export interface CaregiverApplicationDocument {
+  id: string
+  fileId?: string
+  documentType: 'national_id_front' | 'national_id_back' | 'face_photo' | 'curriculum' | 'hoja_de_vida' | 'certification'
+  label: string
+  status: 'pending' | 'approved' | 'rejected'
+  fileName: string
+  fileUrl?: string
+  uploadedAt?: string
+  aiSummary?: string
+}
+
+export interface CaregiverApplicationStatus {
+  verificationId?: string
+  status: 'draft' | 'pending' | 'approved' | 'rejected'
+  canOfferServices: boolean
+  hasRequiredDocuments: boolean
+  missingDocuments: string[]
+  submittedAt?: string
+  reviewedAt?: string
+  adminAlerts: string[]
+  aiSummary: string
+  rejectionReason?: string
+  previousRejectionReason?: string
+  facePhotoUrl?: string
+  documents: CaregiverApplicationDocument[]
 }
 
 export interface DashboardMetric {
@@ -185,10 +267,16 @@ export interface PaymentProof {
   uploadedAt: string
   status: 'Pending Review' | 'Approved' | 'Rejected'
   amount: number
+  method?: string
+  referenceNumber?: string
+  expectedAmount?: number
+  expectedReferenceCode?: string
   aiDecision: 'approved' | 'manual-review' | 'rejected'
   aiConfidence: number
   anomaly: string
   reviewedBy: string
+  fileUrl?: string
+  fileName?: string
 }
 
 export interface Complaint {
@@ -199,6 +287,7 @@ export interface Complaint {
   urgency: 'urgent' | 'notice' | 'other'
   priority: 'high' | 'medium' | 'low'
   status: 'open' | 'investigating' | 'resolved'
+  description?: string
 }
 
 export interface SupportTicket {
@@ -223,6 +312,7 @@ export interface ContentItem {
   title: string
   section: string
   status: 'draft' | 'scheduled' | 'published'
+  body?: string
 }
 
 export interface AuditLog {
@@ -237,6 +327,9 @@ export interface ApprovalDossier {
   id: string
   caregiverId: string
   caregiverName: string
+  caregiverAvatar?: string
+  status: 'pending' | 'approved' | 'rejected'
+  canWork?: boolean
   roleFit: string
   aiDecision: 'recommended' | 'manual-review' | 'reject'
   aiConfidence: number
@@ -244,6 +337,20 @@ export interface ApprovalDossier {
   flags: string[]
   stepStatuses: VerificationStep[]
   documents: string[]
+  rejectionReason?: string
+  previousRejectionReason?: string
+  submittedAt?: string
+  reviewedAt?: string
+  profileSummary?: {
+    headline?: string
+    bio?: string
+    languages?: string[]
+    yearsExperience?: number
+    pricePerHour?: number
+    serviceZones?: string[]
+    serviceTypes?: string[]
+  }
+  documentItems?: CaregiverApplicationDocument[]
 }
 
 export interface SocialPost {
@@ -270,9 +377,26 @@ export interface BackupRecord {
 export interface CalendarDayStatus {
   date: string
   day: number
-  state: 'booked' | 'available' | 'off'
+  state: 'booked' | 'available' | 'off' | 'pending' | 'mixed' | 'full'
   serviceType?: string
   timeRange?: string
+  reservationCount?: number
+  pendingCount?: number
+  confirmedCount?: number
+  totalReservedHours?: number
+  workingHoursCapacity?: number
+  hasCapacity?: boolean
+  summary?: string
+  alert?: string
+  reservations?: Array<{
+    id: string
+    clientName: string
+    serviceType: string
+    startTime: string
+    endTime: string
+    hours: number
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  }>
 }
 
 export interface BookingEstimate {

@@ -17,7 +17,6 @@ import { CareersPage } from '../pages/public/CareersPage'
 import { BlogPage } from '../pages/public/BlogPage'
 import { TestimonialsPage } from '../pages/public/TestimonialsPage'
 import { TrustSafetyPage } from '../pages/public/TrustSafetyPage'
-import { DemoPage } from '../pages/public/DemoPage'
 import { CommunityPage } from '../pages/public/CommunityPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
 import { RoleAccessPage } from '../pages/auth/RoleAccessPage'
@@ -27,14 +26,12 @@ import { SmsVerificationPage } from '../pages/auth/SmsVerificationPage'
 import { BookingPage } from '../pages/shared/BookingPage'
 import { ClientHomePage } from '../pages/client/ClientHomePage'
 import { SearchCaregiversPage } from '../pages/client/SearchCaregiversPage'
-import { FavoritesPage } from '../pages/client/FavoritesPage'
 import { ClientMessagesPage } from '../pages/client/ClientMessagesPage'
 import { ClientNotificationsPage } from '../pages/client/ClientNotificationsPage'
 import { ClientBookingsPage } from '../pages/client/ClientBookingsPage'
 import { ClientPaymentsPage } from '../pages/client/ClientPaymentsPage'
 import { ClientSettingsPage } from '../pages/client/ClientSettingsPage'
 import { UpcomingServicesPage } from '../pages/client/UpcomingServicesPage'
-import { SavedSearchesPage } from '../pages/client/SavedSearchesPage'
 import { ClientReviewsPage } from '../pages/client/ClientReviewsPage'
 import { ClientReportsPage } from '../pages/client/ClientReportsPage'
 import { CaregiverHomePage } from '../pages/caregiver/CaregiverHomePage'
@@ -73,7 +70,6 @@ export const router = createBrowserRouter([
       { path: '/pricing', element: <PricingPage /> },
       { path: '/contact', element: <ContactPage /> },
       { path: '/faq', element: <FaqPage /> },
-      { path: '/demo', element: <DemoPage /> },
       { path: '/search', element: <SearchCaregiversPage /> },
       { path: '/community', element: <CommunityPage /> },
       { path: '/booking', element: <BookingPage /> },
@@ -113,9 +109,9 @@ export const router = createBrowserRouter([
       { path: 'home', element: <ClientHomePage /> },
       { path: 'booking', element: <BookingPage /> },
       { path: 'search', element: <SearchCaregiversPage /> },
-      { path: 'favorites', element: <FavoritesPage /> },
+      { path: 'favorites', element: <Navigate to="/client/search" replace /> },
       { path: 'upcoming', element: <UpcomingServicesPage /> },
-      { path: 'saved-searches', element: <SavedSearchesPage /> },
+      { path: 'saved-searches', element: <Navigate to="/client/search" replace /> },
       { path: 'messages', element: <ClientMessagesPage /> },
       { path: 'notifications', element: <ClientNotificationsPage /> },
       { path: 'bookings', element: <ClientBookingsPage /> },

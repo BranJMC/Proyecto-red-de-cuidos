@@ -1,6 +1,25 @@
-import { notifications } from '../../services/mockData'
+import { useEffect, useState } from 'react'
+import { mockApi } from '../../services/api'
+import { useAppStore } from '../../store/useAppStore'
+import type { NotificationItem } from '../../types'
 
 export function ClientNotificationsPage() {
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const user = useAppStore((state) => state.user)
+  const setStoreNotifications = useAppStore((state) => state.setNotifications)
+
+  useEffect(() => {
+    if (!user.id) {
+      return
+    }
+
+    mockApi.getNotificationsByUser(user.id).then((items) => {
+      setNotifications(items)
+      setStoreNotifications(items)
+    })
+    mockApi.markNotificationsRead(user.id)
+  }, [setStoreNotifications, user.id])
+
   return (
     <div className="space-y-4">
       {notifications.map((item) => (

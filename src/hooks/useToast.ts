@@ -8,6 +8,9 @@ export function useToast() {
       success(title: string, description: string) {
         pushToast({ title, description })
       },
+      error(title: string, description: string) {
+        pushToast({ title, description })
+      },
     }),
     [pushToast],
   )

@@ -1,6 +1,20 @@
-import { notifications } from '../../services/mockData'
+import { useEffect, useState } from 'react'
+import { mockApi } from '../../services/api'
+import { useAppStore } from '../../store/useAppStore'
+import type { NotificationItem } from '../../types'
 
 export function CaregiverNotificationsPage() {
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const user = useAppStore((state) => state.user)
+
+  useEffect(() => {
+    if (!user.id) {
+      return
+    }
+
+    mockApi.getNotificationsByUser(user.id).then(setNotifications)
+  }, [user.id])
+
   return (
     <div className="space-y-4">
       {notifications.map((item) => (
