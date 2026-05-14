@@ -9,6 +9,7 @@ export function ChatLayout({
   shiftLog,
   hourlyUpdates,
   initialThreadId,
+  showOperationalControls = false,
   onSendMessage,
   onCheckIn,
   onCheckOut,
@@ -17,6 +18,7 @@ export function ChatLayout({
   shiftLog?: ShiftLog
   hourlyUpdates?: ServiceUpdate[]
   initialThreadId?: string | null
+  showOperationalControls?: boolean
   onSendMessage?: (payload: { conversationId: string; content: string }) => Promise<void>
   onCheckIn?: (bookingId: string) => Promise<void>
   onCheckOut?: (bookingId: string) => Promise<void>
@@ -107,10 +109,12 @@ export function ChatLayout({
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Escribe sin tener que bajar al final de la conversacion.
             </p>
-            <Button variant="secondary" disabled>
-              <Camera className="mr-2 size-4" />
-              Evidencia
-            </Button>
+            {showOperationalControls ? (
+              <Button variant="secondary" disabled>
+                <Camera className="mr-2 size-4" />
+                Evidencia
+              </Button>
+            ) : null}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
@@ -125,10 +129,12 @@ export function ChatLayout({
                 }
               }}
             />
-            <Button variant="secondary" disabled>
-              <ImagePlus className="mr-2 size-4" />
-              Imagen
-            </Button>
+            {showOperationalControls ? (
+              <Button variant="secondary" disabled>
+                <ImagePlus className="mr-2 size-4" />
+                Imagen
+              </Button>
+            ) : null}
             <Button onClick={handleSendMessage} disabled={sending || !draftMessage.trim()}>
               {sending ? 'Enviando...' : 'Enviar'}
             </Button>
@@ -150,7 +156,7 @@ export function ChatLayout({
             </div>
           ))}
         </div>
-        {shiftLog ? (
+        {showOperationalControls && shiftLog ? (
           <div className="mb-5 rounded-[28px] border border-slate-200 bg-slate-50/90 p-5 dark:border-white/10 dark:bg-slate-800/45">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -171,7 +177,7 @@ export function ChatLayout({
             </div>
           </div>
         ) : null}
-        {hourlyUpdates?.length ? (
+        {showOperationalControls && hourlyUpdates?.length ? (
           <div className="mb-5 rounded-[28px] border border-slate-200 p-5 dark:border-white/10">
             <div className="mb-4">
               <p className="text-xs uppercase tracking-[0.24em] text-cyan-600 dark:text-cyan-300">Status por hora obligatorio</p>

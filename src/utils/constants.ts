@@ -7,7 +7,7 @@ export const publicNav: NavItem[] = [
 ]
 
 export const footerNav: NavItem[] = [
-  { label: 'Blog', href: '/blog' },
+  { label: 'Noticias', href: '/blog' },
   { label: 'Testimonios', href: '/testimonials' },
   { label: 'Carreras', href: '/careers' },
   { label: 'Privacidad', href: '/privacy' },
@@ -20,7 +20,6 @@ export const dashboardNav: Record<UserRole, NavItem[]> = {
     { label: 'Inicio', href: '/client/home' },
     { label: 'Reservar servicio', href: '/client/booking' },
     { label: 'Reservas activas', href: '/client/bookings' },
-    { label: 'Servicios proximos', href: '/client/upcoming' },
     { label: 'Mensajes', href: '/client/messages' },
     { label: 'Notificaciones', href: '/client/notifications' },
     { label: 'Pagos', href: '/client/payments' },
@@ -46,7 +45,6 @@ export const dashboardNav: Record<UserRole, NavItem[]> = {
     { label: 'Comprobantes', href: '/admin/payment-proofs' },
     { label: 'Reportes', href: '/admin/reports' },
     { label: 'Notificaciones', href: '/admin/notifications' },
-    { label: 'Auditoria', href: '/admin/audit-logs' },
     { label: 'Backup y ajustes', href: '/admin/settings' },
   ],
 }
@@ -64,7 +62,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
   },
   {
-    name: 'Premium Family',
+    name: 'Familia premium',
     price: '$39/mes',
     description: 'Para hogares con reservas recurrentes, urgencias y alta exigencia operativa.',
     features: [
@@ -76,8 +74,8 @@ export const pricingPlans: PricingPlan[] = [
     highlighted: true,
   },
   {
-    name: 'Ops Enterprise',
-    price: 'Custom',
+    name: 'Operaciones empresariales',
+    price: 'Personalizado',
     description: 'Para programas sociales, aseguradoras, residencias y empresas con volumen.',
     features: [
       'Panel admin multi-equipo',

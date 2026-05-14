@@ -43,6 +43,7 @@ import type {
   PaymentProof,
   CaregiverEarningsSummary,
   PaymentHistoryItem,
+  CaregiverReminder,
   PlatformSettings,
   SavedSearch,
   ServiceUpdate,
@@ -321,6 +322,15 @@ export const mockApi = {
     const response = await api.post<{ ok: boolean }>('/notifications/mark-read', { userId })
     return response.data
   },
+  async deleteNotification(notificationId: string, userId: string) {
+    if (useMocks) {
+      await wait()
+      return { ok: true }
+    }
+
+    const response = await api.delete<{ ok: boolean }>(`/notifications/${notificationId}`, { data: { userId } })
+    return response.data
+  },
   async getThreads() {
     return getResource('/messages/threads', messageThreads)
   },
@@ -564,11 +574,11 @@ export const mockApi = {
   async getCaregiverReminders(caregiverId: string) {
     if (useMocks) {
       await wait()
-      return caregiverUpcomingReminders
+      return caregiverUpcomingReminders as CaregiverReminder[]
     }
 
-    const response = await api.get('/caregiver/reminders', { params: { caregiverId } })
-    return response.data as typeof caregiverUpcomingReminders
+    const response = await api.get<CaregiverReminder[]>('/caregiver/reminders', { params: { caregiverId } })
+    return response.data
   },
   async getCaregiverCalendar(caregiverId: string) {
     if (useMocks) {

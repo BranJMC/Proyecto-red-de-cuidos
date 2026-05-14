@@ -302,6 +302,34 @@ function mapShiftLogRow(row) {
   }
 }
 
+function computeServiceState({ scheduledDate, endTime, checkInAt, checkOutAt }) {
+  if (checkOutAt) {
+    return 'completed'
+  }
+
+  if (checkInAt) {
+    return 'in-progress'
+  }
+
+  const now = new Date()
+  const serviceEnd = new Date(`${formatDateInputValue(scheduledDate)}T${String(endTime).slice(0, 5)}:00`)
+  return serviceEnd < now ? 'missed' : 'upcoming'
+}
+
+function describeServiceState(state, scheduledDate) {
+  const dateLabel = formatDateLabel(scheduledDate)
+  switch (state) {
+    case 'in-progress':
+      return 'En progreso'
+    case 'completed':
+      return 'Finalizado'
+    case 'missed':
+      return 'Perdio el trabajo por no registrar entrada y salida'
+    default:
+      return `Servicio proximo el ${dateLabel}`
+  }
+}
+
 function getRoleHomePath(role) {
   if (role === 'caregiver') {
     return '/caregiver/home'
@@ -1028,43 +1056,92 @@ app.get('/api/bookings', async (req, res) => {
       b.caregiver_id,
       caregiver.full_name AS caregiver_name,
       client.full_name AS client_name,
+      conv.id AS conversation_id,
      b.service_type,
       COALESCE(n.name, c.name, p.name, bl.label, 'Sin zona') AS zone,
       bl.address_line,
       b.scheduled_date,
       b.start_time::text,
+      b.end_time::text,
       b.total_hours,
       b.status,
-      b.total_amount
+      b.total_amount,
+      b.notes,
+      bc.check_in_at,
+      bc.check_out_at,
+      bc.status AS shift_status,
+      pp.status AS payment_proof_status,
+      pp.created_at AS payment_proof_uploaded_at,
+      proof_file.public_url AS payment_proof_file_url,
+      proof_file.original_filename AS payment_proof_file_name
      FROM bookings b
      JOIN users caregiver ON caregiver.id = b.caregiver_id
      JOIN users client ON client.id = b.client_id
+     LEFT JOIN conversations conv ON conv.booking_id = b.id
      LEFT JOIN booking_locations bl ON bl.id = b.location_id
      LEFT JOIN provinces p ON p.id = bl.province_id
      LEFT JOIN cities c ON c.id = bl.city_id
      LEFT JOIN neighborhoods n ON n.id = bl.neighborhood_id
+     LEFT JOIN booking_checkins bc ON bc.booking_id = b.id
+     LEFT JOIN LATERAL (
+       SELECT id, status, created_at
+       FROM payment_proofs
+       WHERE booking_id = b.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) pp ON true
+     LEFT JOIN LATERAL (
+       SELECT f.public_url, f.original_filename
+       FROM payment_proof_files ppf
+       JOIN files f ON f.id = ppf.file_id
+       WHERE ppf.payment_proof_id = pp.id
+       ORDER BY ppf.created_at DESC
+       LIMIT 1
+     ) proof_file ON true
      ${whereClause}
      ORDER BY b.scheduled_date DESC, b.start_time DESC`,
     params,
   )
 
   res.json(
-    rows.map((row) => ({
-      id: row.id,
-      caregiverId: row.caregiver_id,
-      caregiverName: row.caregiver_name,
-      clientName: row.client_name,
-      service: row.service_type,
-      zone: row.zone,
-      addressLine: row.address_line ?? undefined,
-      date: formatDateInputValue(row.scheduled_date),
-      startTime: row.start_time.slice(0, 5),
-      duration: `${Number(row.total_hours)} horas`,
-      hours: Number(row.total_hours),
-      status: mapBookingStatus(row.status),
-      amount: formatCurrencyValue(row.total_amount),
-      paymentReferenceCode: buildPaymentReferenceCode(row.id),
-    })),
+    rows.map((row) => {
+      const serviceState = computeServiceState({
+        scheduledDate: row.scheduled_date,
+        endTime: row.end_time,
+        checkInAt: row.check_in_at,
+        checkOutAt: row.check_out_at,
+      })
+
+      return {
+        id: row.id,
+        caregiverId: row.caregiver_id,
+        caregiverName: row.caregiver_name,
+        clientName: row.client_name,
+        conversationId: row.conversation_id ?? undefined,
+        service: row.service_type,
+        zone: row.zone,
+        addressLine: row.address_line ?? undefined,
+        date: formatDateInputValue(row.scheduled_date),
+        startTime: row.start_time.slice(0, 5),
+        endTime: row.end_time?.slice(0, 5),
+        duration: `${Number(row.total_hours)} horas`,
+        hours: Number(row.total_hours),
+        status: mapBookingStatus(row.status),
+        amount: formatCurrencyValue(row.total_amount),
+        notes: row.notes ?? undefined,
+        paymentReferenceCode: buildPaymentReferenceCode(row.id),
+        shiftStatus: row.shift_status ?? 'pending-start',
+        checkIn: row.check_in_at ? formatTimeLabel(row.check_in_at) : undefined,
+        checkOut: row.check_out_at ? formatTimeLabel(row.check_out_at) : undefined,
+        serviceState,
+        serviceStateLabel: describeServiceState(serviceState, row.scheduled_date),
+        paymentDeadlineAt: row.check_out_at ? new Date(new Date(row.check_out_at).getTime() + 60 * 60 * 1000).toISOString() : undefined,
+        paymentProofStatus: row.payment_proof_status ? mapPaymentProofStatus(row.payment_proof_status) : undefined,
+        paymentProofFileUrl: toAbsoluteUrl(req, row.payment_proof_file_url),
+        paymentProofFileName: row.payment_proof_file_name ?? undefined,
+        paymentProofUploadedAt: row.payment_proof_uploaded_at ? formatDateLabel(row.payment_proof_uploaded_at) : undefined,
+      }
+    }),
   )
 })
 
@@ -1082,6 +1159,41 @@ app.post('/api/bookings', async (req, res) => {
 
   if (!clientId || !caregiverId || !serviceType || !date || !startTime || !hours) {
     return res.status(400).json({ message: 'Faltan datos para crear la reserva.' })
+  }
+
+  const paymentRestrictionResult = await query(
+    `SELECT
+      b.id,
+      b.scheduled_date,
+      b.end_time::text,
+      bc.check_out_at,
+      pp.status AS proof_status
+     FROM bookings b
+     LEFT JOIN booking_checkins bc ON bc.booking_id = b.id
+     LEFT JOIN LATERAL (
+       SELECT status
+       FROM payment_proofs
+       WHERE booking_id = b.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) pp ON true
+     WHERE b.client_id = $1
+       AND b.status = 'completed'
+       AND COALESCE(pp.status, 'pending_review') <> 'approved'
+     ORDER BY COALESCE(bc.check_out_at, b.updated_at) DESC
+     LIMIT 1`,
+    [clientId],
+  )
+
+  if (paymentRestrictionResult.rows[0]) {
+    const row = paymentRestrictionResult.rows[0]
+    const deadlineAt = row.check_out_at ? new Date(new Date(row.check_out_at).getTime() + 60 * 60 * 1000).toISOString() : undefined
+    return res.status(409).json({
+      message: 'Debes esperar la aprobacion del comprobante del servicio anterior antes de solicitar una nueva reserva.',
+      blockingBookingId: row.id,
+      paymentDeadlineAt: deadlineAt,
+      proofStatus: row.proof_status ?? 'pending_review',
+    })
   }
 
   const caregiverResult = await query(
@@ -1230,6 +1342,7 @@ app.get('/api/notifications', async (req, res) => {
       title: row.title,
       description: row.description,
       time: formatTimeLabel(row.time),
+      date: formatDateLabel(row.time),
       read: row.read,
       type: row.type,
     })),
@@ -1239,6 +1352,16 @@ app.get('/api/notifications', async (req, res) => {
 app.post('/api/notifications/mark-read', async (req, res) => {
   const { userId } = req.body ?? {}
   await query(`UPDATE notifications SET read_at = now() WHERE user_id = $1 AND read_at IS NULL`, [userId])
+  res.json({ ok: true })
+})
+
+app.delete('/api/notifications/:id', async (req, res) => {
+  const { userId } = req.body ?? {}
+  if (!userId) {
+    return res.status(400).json({ message: 'userId es requerido.' })
+  }
+
+  await query(`DELETE FROM notifications WHERE id = $1 AND user_id = $2`, [req.params.id, userId])
   res.json({ ok: true })
 })
 
@@ -2782,23 +2905,47 @@ app.get('/api/analytics/:seriesName', async (req, res) => {
 app.get('/api/caregiver/reminders', async (req, res) => {
   const { caregiverId } = req.query
   const { rows } = await query(
-    `SELECT b.id, b.scheduled_date, b.start_time::text, b.service_type, client.full_name AS client
+    `SELECT
+      b.id,
+      conv.id AS conversation_id,
+      b.scheduled_date,
+      b.start_time::text,
+      b.end_time::text,
+      b.service_type,
+      client.full_name AS client,
+      bc.check_in_at,
+      bc.check_out_at
      FROM bookings b
      JOIN users client ON client.id = b.client_id
+     LEFT JOIN conversations conv ON conv.booking_id = b.id
+     LEFT JOIN booking_checkins bc ON bc.booking_id = b.id
      WHERE b.caregiver_id = $1
-       AND b.status IN ('requested', 'confirmed', 'in_progress')
+       AND b.status IN ('confirmed', 'in_progress', 'completed')
      ORDER BY b.scheduled_date ASC, b.start_time ASC
      LIMIT 5`,
     [caregiverId],
   )
   res.json(
-    rows.map((row) => ({
-      id: row.id,
-      date: formatDateLabel(row.scheduled_date),
-      time: row.start_time.slice(0, 5),
-      service: row.service_type,
-      client: row.client,
-    })),
+    rows.map((row) => {
+      const state = computeServiceState({
+        scheduledDate: row.scheduled_date,
+        endTime: row.end_time,
+        checkInAt: row.check_in_at,
+        checkOutAt: row.check_out_at,
+      })
+
+      return {
+        id: row.id,
+        conversationId: row.conversation_id ?? undefined,
+        date: formatDateLabel(row.scheduled_date),
+        dateRaw: formatDateInputValue(row.scheduled_date),
+        time: row.start_time.slice(0, 5),
+        service: row.service_type,
+        client: row.client,
+        status: state,
+        statusLabel: describeServiceState(state, row.scheduled_date),
+      }
+    }),
   )
 })
 

@@ -1,6 +1,6 @@
 import { Camera, UploadCloud } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { statusTone } from '../../utils/helpers'
+import { paymentProofStatusLabel, statusTone } from '../../utils/helpers'
 
 interface ReceiptUploaderProps {
   file?: File | null
@@ -38,7 +38,7 @@ export function ReceiptUploader({
             Ya puedes seleccionar un archivo real y revisar su preview local antes de enviar el pago desde la pantalla de pagos.
           </p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(status)}`}>{status}</span>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(status)}`}>{paymentProofStatusLabel(status)}</span>
       </div>
       <label className="mt-6 flex min-h-60 cursor-pointer flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.16),_transparent_55%)] p-6 text-center dark:border-white/10">
         <UploadCloud className="size-8 text-cyan-500" />

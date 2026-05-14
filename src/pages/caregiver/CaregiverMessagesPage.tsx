@@ -23,7 +23,9 @@ export function CaregiverMessagesPage() {
 
     mockApi.getThreadsByUser(user.id).then(async (items) => {
       setThreads(items)
-      const bookingId = items[0]?.bookingId
+      const preferredThreadId = searchParams.get('thread')
+      const activeThread = items.find((item) => item.id === preferredThreadId) ?? items[0]
+      const bookingId = activeThread?.bookingId
       if (bookingId) {
         const [updates, nextShiftLog] = await Promise.all([
           mockApi.getHourlyServiceUpdatesForBooking(bookingId),
@@ -38,7 +40,7 @@ export function CaregiverMessagesPage() {
         })
       }
     })
-  }, [user.id, user.name])
+  }, [searchParams, user.id, user.name])
 
   return (
     <ChatLayout
@@ -46,6 +48,7 @@ export function CaregiverMessagesPage() {
       shiftLog={shiftLog}
       hourlyUpdates={hourlyUpdates}
       initialThreadId={searchParams.get('thread')}
+      showOperationalControls
       onSendMessage={async ({ conversationId, content }) => {
         if (!user.id) {
           return

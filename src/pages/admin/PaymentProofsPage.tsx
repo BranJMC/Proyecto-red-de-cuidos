@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { useToast } from '../../hooks/useToast'
 import { mockApi } from '../../services/api'
 import type { PaymentProof } from '../../types'
-import { currency, statusTone } from '../../utils/helpers'
+import { aiDecisionLabel, currency, paymentProofStatusLabel, statusTone } from '../../utils/helpers'
 
 function isImageProof(proof: PaymentProof) {
   const target = `${proof.fileUrl ?? ''} ${proof.fileName ?? ''}`.toLowerCase()
@@ -92,7 +92,7 @@ export function PaymentProofsPage() {
                       Codigo: {proof.expectedReferenceCode ?? 'Sin codigo'}
                     </p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(proof.status)}`}>{proof.status}</span>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(proof.status)}`}>{paymentProofStatusLabel(proof.status)}</span>
                 </div>
               </button>
             ))}
@@ -105,9 +105,9 @@ export function PaymentProofsPage() {
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="font-display text-3xl text-slate-950 dark:text-white">Comprobante {selectedProof.bookingId}</h2>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(selectedProof.status)}`}>{selectedProof.status}</span>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(selectedProof.status)}`}>{paymentProofStatusLabel(selectedProof.status)}</span>
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(selectedProof.aiDecision)}`}>
-                    IA: {selectedProof.aiDecision}
+                    IA: {aiDecisionLabel(selectedProof.aiDecision)}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

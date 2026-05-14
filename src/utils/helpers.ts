@@ -53,3 +53,66 @@ export function statusTone(status: string) {
 
   return 'bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300'
 }
+
+export function bookingOperationalTone(status?: string) {
+  switch (status) {
+    case 'completed':
+    case 'Finalizado':
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300'
+    case 'in-progress':
+    case 'En progreso':
+      return 'bg-sky-100 text-sky-700 dark:bg-sky-400/10 dark:text-sky-300'
+    case 'missed':
+      return 'bg-rose-100 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300'
+    default:
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300'
+  }
+}
+
+export function paymentProofStatusLabel(status?: string) {
+  switch (status) {
+    case 'Approved':
+      return 'Aprobado'
+    case 'Rejected':
+      return 'Rechazado'
+    case 'Pending Review':
+      return 'Pendiente de revision'
+    default:
+      return status ?? 'Pendiente'
+  }
+}
+
+export function aiDecisionLabel(decision?: string) {
+  switch (decision) {
+    case 'approved':
+      return 'Aprobado'
+    case 'recommended':
+      return 'Recomendado'
+    case 'manual-review':
+      return 'Revision manual'
+    case 'reject':
+    case 'rejected':
+      return 'Rechazado'
+    default:
+      return decision ?? 'Pendiente'
+  }
+}
+
+export function serviceLabel(service?: string) {
+  switch (service) {
+    case 'Elder care':
+      return 'Cuidado de adulto mayor'
+    case 'Child care':
+      return 'Cuidado infantil'
+    case 'Disability support':
+      return 'Apoyo a discapacidad'
+    case 'Home assistance':
+      return 'Asistencia en el hogar'
+    case 'Overnight care':
+      return 'Cuidado nocturno'
+    case 'Emergency care':
+      return 'Cuidado de emergencia'
+    default:
+      return service ?? 'Servicio'
+  }
+}

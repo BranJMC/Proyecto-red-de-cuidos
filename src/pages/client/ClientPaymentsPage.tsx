@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { FileCheck2, ShieldCheck } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { DataTable } from '../../components/ui/DataTable'
@@ -7,9 +8,10 @@ import { useToast } from '../../hooks/useToast'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { Booking, PaymentHistoryItem, PaymentProof } from '../../types'
-import { currency, statusTone } from '../../utils/helpers'
+import { currency, paymentProofStatusLabel, serviceLabel, statusTone } from '../../utils/helpers'
 
 export function ClientPaymentsPage() {
+  const [searchParams] = useSearchParams()
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryItem[]>([])
   const [paymentProofs, setPaymentProofs] = useState<PaymentProof[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -34,11 +36,22 @@ export function ClientPaymentsPage() {
       setPaymentHistory(history)
       setPaymentProofs(proofs)
       setBookings(userBookings)
+      const requestedBookingId = searchParams.get('booking')
+      if (requestedBookingId && userBookings.some((booking) => booking.id === requestedBookingId)) {
+        setBookingId(requestedBookingId)
+      }
     })
-  }, [user.id])
+  }, [searchParams, user.id])
 
   const payableBookings = useMemo(
-    () => bookings.filter((item) => item.status === 'pending' || item.status === 'confirmed'),
+    () =>
+      bookings.filter(
+        (item) =>
+          item.status === 'pending' ||
+          item.status === 'confirmed' ||
+          item.status === 'in-progress' ||
+          (item.status === 'completed' && item.paymentProofStatus !== 'Approved'),
+      ),
     [bookings],
   )
   const selectedBookingId = bookingId || payableBookings[0]?.id || ''
@@ -154,7 +167,7 @@ export function ClientPaymentsPage() {
             </div>
             {selectedBooking ? (
               <div className="grid gap-3 rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
-                <p>Servicio: {selectedBooking.service} | Zona: {selectedBooking.zone} | Hora: {selectedBooking.startTime}</p>
+                <p>Servicio: {serviceLabel(selectedBooking.service)} | Zona: {selectedBooking.zone} | Hora: {selectedBooking.startTime}</p>
                 <p>Monto esperado: {currency(selectedBooking.amount)}</p>
                 <p className="font-semibold text-slate-950 dark:text-white">
                   Codigo de motivo: {selectedBooking.paymentReferenceCode ?? 'Pendiente'}
@@ -174,7 +187,7 @@ export function ClientPaymentsPage() {
           </div>
           <div className="mt-6 grid gap-4">
             {[
-              ['AI verification', 'Lectura OCR, monto esperado y deteccion de anomalias'],
+              ['Verificacion automatica', 'Lectura OCR, monto esperado y deteccion de anomalias'],
               ['Revision operativa', 'El trabajador puede validar o escalar el recibo'],
               ['Control admin', 'Admin interviene cuando la AI detecta riesgo o incongruencias'],
             ].map(([title, description]) => (
@@ -189,7 +202,7 @@ export function ClientPaymentsPage() {
               <div key={proof.id} className="rounded-2xl border border-slate-200 px-4 py-4 text-sm dark:border-white/10">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-medium text-slate-950 dark:text-white">Comprobante {proof.bookingId}</p>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(proof.status)}`}>{proof.status}</span>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(proof.status)}`}>{paymentProofStatusLabel(proof.status)}</span>
                 </div>
                 <p className="mt-2 text-slate-500 dark:text-slate-400">
                   {proof.uploadedAt} | {currency(proof.amount)} | Ref: {proof.referenceNumber || 'Sin referencia'}
@@ -216,7 +229,7 @@ export function ClientPaymentsPage() {
           payment.caregiverName,
           payment.method,
           currency(payment.amount),
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(payment.status)}`}>{payment.status}</span>,
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(payment.status)}`}>{paymentProofStatusLabel(payment.status)}</span>,
         ])}
       />
     </div>

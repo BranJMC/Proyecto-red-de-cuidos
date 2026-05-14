@@ -6,6 +6,7 @@ import { StatCard } from '../../components/ui/StatCard'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { Booking, DashboardMetric, NotificationItem } from '../../types'
+import { bookingOperationalTone } from '../../utils/helpers'
 
 export function ClientHomePage() {
   const [metrics, setMetrics] = useState<DashboardMetric[]>([])
@@ -32,7 +33,7 @@ export function ClientHomePage() {
   }, [setStoreNotifications, user.id])
 
   const nextBooking = useMemo(
-    () => bookings.find((booking) => booking.status === 'confirmed' || booking.status === 'pending') ?? null,
+    () => bookings.find((booking) => booking.status === 'confirmed' || booking.status === 'pending' || booking.status === 'in-progress' || booking.status === 'completed') ?? null,
     [bookings],
   )
 
@@ -73,9 +74,21 @@ export function ClientHomePage() {
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-400">
             {nextBooking
-              ? `${nextBooking.caregiverName} aparece para ${nextBooking.date} a las ${nextBooking.startTime}. Codigo de reserva: ${nextBooking.paymentReferenceCode ?? 'pendiente de confirmacion'}.`
+              ? `${nextBooking.caregiverName} aparece para ${nextBooking.date} a las ${nextBooking.startTime}. Estado actual: ${nextBooking.serviceStateLabel ?? nextBooking.status}. Codigo de reserva: ${nextBooking.paymentReferenceCode ?? 'pendiente de confirmacion'}.`
               : 'Puedes buscar un cuidador verificado, revisar su perfil y solicitar un servicio desde esta misma plataforma.'}
           </p>
+          {nextBooking ? (
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${bookingOperationalTone(nextBooking.serviceState || nextBooking.serviceStateLabel)}`}>
+                {nextBooking.serviceStateLabel ?? nextBooking.status}
+              </span>
+              {nextBooking.paymentDeadlineAt && nextBooking.paymentProofStatus !== 'Approved' ? (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">
+                  Debes subir comprobante antes de seguir reservando
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/client/booking">
               <Button>Reservar servicio</Button>
@@ -83,6 +96,11 @@ export function ClientHomePage() {
             <Link to="/client/bookings">
               <Button variant="secondary">Ver mis reservas</Button>
             </Link>
+            {nextBooking?.status === 'completed' && nextBooking.paymentProofStatus !== 'Approved' ? (
+              <Link to={`/client/payments?booking=${nextBooking.id}`}>
+                <Button>Adjuntar comprobante</Button>
+              </Link>
+            ) : null}
           </div>
         </div>
 

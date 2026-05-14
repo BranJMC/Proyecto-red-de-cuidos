@@ -31,7 +31,6 @@ import { ClientNotificationsPage } from '../pages/client/ClientNotificationsPage
 import { ClientBookingsPage } from '../pages/client/ClientBookingsPage'
 import { ClientPaymentsPage } from '../pages/client/ClientPaymentsPage'
 import { ClientSettingsPage } from '../pages/client/ClientSettingsPage'
-import { UpcomingServicesPage } from '../pages/client/UpcomingServicesPage'
 import { ClientReviewsPage } from '../pages/client/ClientReviewsPage'
 import { ClientReportsPage } from '../pages/client/ClientReportsPage'
 import { CaregiverHomePage } from '../pages/caregiver/CaregiverHomePage'
@@ -55,7 +54,6 @@ import { SupportTicketsPage } from '../pages/admin/SupportTicketsPage'
 import { FraudAlertsPage } from '../pages/admin/FraudAlertsPage'
 import { AnalyticsPage } from '../pages/admin/AnalyticsPage'
 import { ContentManagementPage } from '../pages/admin/ContentManagementPage'
-import { AuditLogsPage } from '../pages/admin/AuditLogsPage'
 import { CaregiverProfilePage } from '../pages/shared/CaregiverProfilePage'
 import { NotFoundPage } from '../pages/shared/NotFoundPage'
 import { OfflinePage } from '../pages/shared/OfflinePage'
@@ -110,7 +108,7 @@ export const router = createBrowserRouter([
       { path: 'booking', element: <BookingPage /> },
       { path: 'search', element: <SearchCaregiversPage /> },
       { path: 'favorites', element: <Navigate to="/client/search" replace /> },
-      { path: 'upcoming', element: <UpcomingServicesPage /> },
+      { path: 'upcoming', element: <Navigate to="/client/bookings" replace /> },
       { path: 'saved-searches', element: <Navigate to="/client/search" replace /> },
       { path: 'messages', element: <ClientMessagesPage /> },
       { path: 'notifications', element: <ClientNotificationsPage /> },
@@ -159,7 +157,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <AdminNotificationsPage /> },
       { path: 'analytics', element: <AnalyticsPage /> },
       { path: 'content', element: <ContentManagementPage /> },
-      { path: 'audit-logs', element: <AuditLogsPage /> },
+      { path: 'audit-logs', element: <Navigate to="/admin/overview" replace /> },
       { path: 'settings', element: <AdminSettingsPage /> },
     ],
   },

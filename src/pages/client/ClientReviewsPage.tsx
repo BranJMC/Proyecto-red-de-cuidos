@@ -5,6 +5,7 @@ import { useToast } from '../../hooks/useToast'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { Booking, Review } from '../../types'
+import { serviceLabel } from '../../utils/helpers'
 
 export function ClientReviewsPage() {
   const [clientBookings, setClientBookings] = useState<Booking[]>([])
@@ -55,7 +56,7 @@ export function ClientReviewsPage() {
             <option value="">Selecciona un cuidador</option>
             {clientBookings.map((booking) => (
               <option key={booking.id} value={booking.id}>
-                {booking.caregiverName} • {booking.service}
+                {booking.caregiverName} • {serviceLabel(booking.service)}
               </option>
             ))}
           </select>

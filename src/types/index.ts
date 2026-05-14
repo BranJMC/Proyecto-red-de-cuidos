@@ -75,16 +75,29 @@ export interface Booking {
   caregiverId: string
   caregiverName: string
   clientName: string
+  conversationId?: string
   service: string
   zone: string
   addressLine?: string
   date: string
   startTime: string
+  endTime?: string
   duration: string
   hours: number
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled'
   amount: number
+  notes?: string
   paymentReferenceCode?: string
+  shiftStatus?: 'pending-start' | 'in-progress' | 'checked-out'
+  checkIn?: string
+  checkOut?: string
+  serviceState?: 'upcoming' | 'in-progress' | 'completed' | 'missed'
+  serviceStateLabel?: string
+  paymentDeadlineAt?: string
+  paymentProofStatus?: 'Pending Review' | 'Approved' | 'Rejected'
+  paymentProofFileUrl?: string
+  paymentProofFileName?: string
+  paymentProofUploadedAt?: string
 }
 
 export interface CaregiverEarningsSummary {
@@ -118,6 +131,7 @@ export interface NotificationItem {
   title: string
   description: string
   time: string
+  date?: string
   read: boolean
   type: 'booking' | 'chat' | 'verification' | 'payment' | 'system' | 'alert'
 }
@@ -208,6 +222,18 @@ export interface DashboardMetric {
   value: string
   change: string
   accent: AccentTone
+}
+
+export interface CaregiverReminder {
+  id: string
+  conversationId?: string
+  date: string
+  dateRaw?: string
+  time: string
+  service: string
+  client: string
+  status?: Booking['serviceState']
+  statusLabel?: string
 }
 
 export interface AdminUser {

@@ -5,14 +5,12 @@ import { useToast } from '../../hooks/useToast'
 import { useSocket } from '../../hooks/useSocket'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
-import type { MessageThread, ServiceUpdate, ShiftLog } from '../../types'
+import type { MessageThread } from '../../types'
 
 export function ClientMessagesPage() {
   useSocket('chat')
   const [searchParams] = useSearchParams()
   const [threads, setThreads] = useState<MessageThread[]>([])
-  const [hourlyUpdates, setHourlyUpdates] = useState<ServiceUpdate[]>([])
-  const [shiftLog, setShiftLog] = useState<ShiftLog | undefined>()
   const user = useAppStore((state) => state.user)
   const toast = useToast()
 
@@ -21,25 +19,12 @@ export function ClientMessagesPage() {
       return
     }
 
-    mockApi.getThreadsByUser(user.id).then(async (items) => {
-      setThreads(items)
-      const bookingId = items[0]?.bookingId
-      if (bookingId) {
-        const [updates, nextShiftLog] = await Promise.all([
-          mockApi.getHourlyServiceUpdatesForBooking(bookingId),
-          mockApi.getShiftLog(bookingId),
-        ])
-        setHourlyUpdates(updates)
-        setShiftLog(nextShiftLog ?? undefined)
-      }
-    })
+    mockApi.getThreadsByUser(user.id).then(setThreads)
   }, [user.id])
 
   return (
     <ChatLayout
       threads={threads}
-      shiftLog={shiftLog}
-      hourlyUpdates={hourlyUpdates}
       initialThreadId={searchParams.get('thread')}
       onSendMessage={async ({ conversationId, content }) => {
         if (!user.id) {

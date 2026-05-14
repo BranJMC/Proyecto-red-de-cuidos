@@ -5,17 +5,18 @@ import { useToast } from '../../hooks/useToast'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { CalendarDayStatus, Caregiver, Zone } from '../../types'
+import { serviceLabel } from '../../utils/helpers'
 import { Button } from './Button'
 import { MonthAvailabilityCalendar } from './MonthAvailabilityCalendar'
 import { PriceCalculatorCard } from './PriceCalculatorCard'
 
 const services = [
-  'Elder care',
-  'Child care',
-  'Disability support',
-  'Home assistance',
-  'Overnight care',
-  'Emergency care',
+  'Cuidado de adulto mayor',
+  'Cuidado infantil',
+  'Apoyo a discapacidad',
+  'Asistencia en el hogar',
+  'Cuidado nocturno',
+  'Cuidado de emergencia',
 ]
 
 interface BookingWizardProps {
@@ -75,7 +76,7 @@ export function BookingWizard({ caregiver }: BookingWizardProps) {
     const nightExtra = effectiveStartTime >= '18:00' ? caregiver.nightShiftFee : 0
     const bookingDate = new Date(`${effectiveDate}T12:00:00`)
     const weekendExtra = [0, 6].includes(bookingDate.getDay()) ? caregiver.weekendFee : 0
-    const emergencyExtra = serviceType === 'Emergency care' ? caregiver.emergencyFee : 0
+    const emergencyExtra = serviceType === 'Cuidado de emergencia' ? caregiver.emergencyFee : 0
     const base = hourlyRate * hours
     const platformFee = Math.round(base * 0.12)
     const discount = coupon.trim() ? 10 : 0
@@ -97,7 +98,7 @@ export function BookingWizard({ caregiver }: BookingWizardProps) {
   }
 
   const currentCaregiver = caregiver
-  const selectedServiceType = serviceType || currentCaregiver.serviceTypes[0] || services[0]
+  const selectedServiceType = serviceType || serviceLabel(currentCaregiver.serviceTypes[0]) || services[0]
   const selectedZone = zone || currentCaregiver.neighborhood || ''
 
   const availableZones = zones.filter(
@@ -136,8 +137,12 @@ export function BookingWizard({ caregiver }: BookingWizardProps) {
 
       toast.success('Reserva enviada', `Tu codigo de pago es ${booking.paymentReferenceCode}. Lo usaras luego en el motivo del deposito.`)
       navigate('/client/bookings')
-    } catch {
-      toast.error('No se pudo reservar', 'La solicitud no pudo guardarse. Revisa los datos e intenta otra vez.')
+    } catch (error: unknown) {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined
+      toast.error('No se pudo reservar', message || 'La solicitud no pudo guardarse. Revisa los datos e intenta otra vez.')
     } finally {
       setSaving(false)
     }
@@ -195,7 +200,7 @@ export function BookingWizard({ caregiver }: BookingWizardProps) {
             {activeDay ? (
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 {activeDay.date} | {activeDay.state}
-                {activeDay.serviceType ? ` | ${activeDay.serviceType}` : ''}
+                {activeDay.serviceType ? ` | ${serviceLabel(activeDay.serviceType)}` : ''}
                 {activeDay.timeRange ? ` | ${activeDay.timeRange}` : ''}
               </p>
             ) : (
@@ -208,7 +213,7 @@ export function BookingWizard({ caregiver }: BookingWizardProps) {
               <div>
                 <label className="mb-2 block text-sm text-slate-600 dark:text-slate-300">Tipo de cuido</label>
                 <select className="field" value={selectedServiceType} onChange={(event) => setServiceType(event.target.value)}>
-                  {[...new Set([...currentCaregiver.serviceTypes, ...services])].map((service) => (
+                  {[...new Set([...currentCaregiver.serviceTypes.map((service) => serviceLabel(service)), ...services])].map((service) => (
                     <option key={service}>{service}</option>
                   ))}
                 </select>

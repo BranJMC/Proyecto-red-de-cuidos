@@ -49,7 +49,7 @@ export function mapBookingStatus(status) {
     payment_review: 'pending',
     requested: 'pending',
     confirmed: 'confirmed',
-    in_progress: 'confirmed',
+    in_progress: 'in-progress',
     completed: 'completed',
     cancelled: 'cancelled',
     rejected: 'cancelled',

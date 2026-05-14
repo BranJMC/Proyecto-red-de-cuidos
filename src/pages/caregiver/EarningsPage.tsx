@@ -4,6 +4,7 @@ import { ChartCard } from '../../components/ui/ChartCard'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { CaregiverEarningsSummary } from '../../types'
+import { aiDecisionLabel, paymentProofStatusLabel } from '../../utils/helpers'
 
 const emptySummary: CaregiverEarningsSummary = {
   totalReceived: 0,
@@ -125,11 +126,11 @@ export function EarningsPage() {
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-300">
                   <p className="font-semibold text-slate-950 dark:text-white">Estado del admin</p>
-                  <p className="mt-1">{payment.status ?? 'Pendiente'}</p>
+                  <p className="mt-1">{paymentProofStatusLabel(payment.status)}</p>
                 </div>
                 <div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-300">
                   <p className="font-semibold text-slate-950 dark:text-white">Estado de IA</p>
-                  <p className="mt-1">{payment.aiDecision ?? 'Pendiente'}</p>
+                  <p className="mt-1">{aiDecisionLabel(payment.aiDecision)}</p>
                 </div>
               </div>
 

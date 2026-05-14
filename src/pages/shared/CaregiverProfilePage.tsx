@@ -5,6 +5,7 @@ import { BookingWizard } from '../../components/ui/BookingWizard'
 import { RatingStars } from '../../components/ui/RatingStars'
 import { mockApi } from '../../services/api'
 import type { ApprovalDossier, Caregiver } from '../../types'
+import { aiDecisionLabel, serviceLabel } from '../../utils/helpers'
 
 export function CaregiverProfilePage() {
   const { slug = '' } = useParams()
@@ -83,12 +84,12 @@ export function CaregiverProfilePage() {
                   </div>
                   <div className="rounded-[24px] border border-slate-200/70 bg-white/80 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/60">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Cobertura</p>
-                    <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{caregiver.zones.slice(0, 3).join(' • ')}</p>
+                    <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{caregiver.zones.slice(0, 3).join(' | ')}</p>
                   </div>
                   <div className="rounded-[24px] border border-slate-200/70 bg-white/80 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/60">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Modalidades</p>
                     <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                      {caregiver.serviceTypes.slice(0, 3).join(' • ')}
+                      {caregiver.serviceTypes.slice(0, 3).map((service) => serviceLabel(service)).join(' | ')}
                     </p>
                   </div>
                 </div>
@@ -123,10 +124,10 @@ export function CaregiverProfilePage() {
               <div className="rounded-[28px] bg-slate-50 p-5 dark:bg-slate-800/60">
                 <p className="text-sm text-slate-500 dark:text-slate-400">Idiomas y horarios</p>
                 <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  {caregiver.languages.join(' • ')}
+                  {caregiver.languages.join(' | ')}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  {caregiver.workingDays.join(' • ')} | {caregiver.workingHours.join(' • ')}
+                  {caregiver.workingDays.join(' | ')} | {caregiver.workingHours.join(' | ')}
                 </p>
               </div>
             </div>
@@ -137,7 +138,7 @@ export function CaregiverProfilePage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <ShieldCheck className="size-5 text-emerald-600 dark:text-emerald-300" />
                     <p className="font-medium text-emerald-800 dark:text-emerald-200">
-                      AI screening: {caregiverDossier.aiDecision} • confianza {(caregiverDossier.aiConfidence * 100).toFixed(0)}%
+                      Revision automatica: {aiDecisionLabel(caregiverDossier.aiDecision)} | confianza {(caregiverDossier.aiConfidence * 100).toFixed(0)}%
                     </p>
                   </div>
                   <p className="mt-2 text-sm leading-7 text-emerald-700 dark:text-emerald-200">{caregiverDossier.aiSummary}</p>

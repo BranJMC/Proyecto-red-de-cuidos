@@ -4,6 +4,7 @@ import { useToast } from '../../hooks/useToast'
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { Booking, Complaint } from '../../types'
+import { serviceLabel } from '../../utils/helpers'
 
 export function ClientReportsPage() {
   const [category, setCategory] = useState('cuidador')
@@ -82,7 +83,7 @@ export function ClientReportsPage() {
             <option value="">Reserva relacionada (opcional)</option>
             {bookings.map((booking) => (
               <option key={booking.id} value={booking.id}>
-                {booking.caregiverName} | {booking.date} | {booking.service}
+                {booking.caregiverName} | {booking.date} | {serviceLabel(booking.service)}
               </option>
             ))}
           </select>

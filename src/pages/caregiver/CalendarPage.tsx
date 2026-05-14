@@ -4,6 +4,7 @@ import { MonthAvailabilityCalendar } from '../../components/ui/MonthAvailability
 import { mockApi } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
 import type { CalendarDayStatus } from '../../types'
+import { serviceLabel } from '../../utils/helpers'
 
 export function CalendarPage() {
   const [days, setDays] = useState<CalendarDayStatus[]>([])
@@ -103,7 +104,7 @@ export function CalendarPage() {
                     Reservado
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{reservation.serviceType}</p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{serviceLabel(reservation.serviceType)}</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   {reservation.startTime} - {reservation.endTime} | {reservation.hours} horas
                 </p>
@@ -129,7 +130,7 @@ export function CalendarPage() {
                     Pendiente
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{reservation.serviceType}</p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{serviceLabel(reservation.serviceType)}</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   {reservation.startTime} - {reservation.endTime} | {reservation.hours} horas
                 </p>
